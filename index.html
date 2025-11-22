@@ -1,536 +1,372 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive Dropdown Testing Sandbox (Enhanced)</title>
-    <!-- Bootstrap JS/CSS (Required for Multi-Level/Button Dropdowns functionality) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Custom CSS for Aesthetic Dark Mode (Overriding Bootstrap styles) -->
-    <style>
-        /* New Aesthetic Color Variables */
-        :root {
-            --primary-bg: #111421; /* Ultra Deep Blue/Black */
-            --secondary-bg: #1a1d2e; /* Card Background */
-            --accent-primary: #38B6FF; /* Electric Blue Accent */
-            --accent-secondary: #00DFA2; /* Neon Green Accent */
-            --text-color: #E6EAF0; /* Light Text */
-            --border-color: #4A4F6A;
-            --input-bg: #222638; /* Darker input to contrast with text */
-            --button-red: #E91E63; 
-        }
-
-        /* Base Body and Layout */
-        body {
-            background-color: var(--primary-bg);
-            color: var(--text-color);
-            font-family: 'Inter', sans-serif; /* Switched to Inter for common availability and readability */
-            padding: 40px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            background-color: var(--secondary-bg);
-            border-radius: 20px;
-            padding: 50px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9); /* Enhanced shadow for depth */
-        }
-
-        /* Typography and Headings */
-        .header-title {
-            font-size: 3rem;
-            font-weight: 900;
-            color: var(--accent-primary);
-            text-shadow: 0 0 10px rgba(56, 182, 255, 0.5); /* Subtle glow effect */
-            border-bottom: 4px solid var(--accent-primary);
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-        }
-
-        .section-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-color);
-            margin-bottom: 30px;
-            padding-top: 20px;
-        }
-        
-        /* Sections and Grids */
-        section {
-            padding: 30px 0;
-            border-bottom: 1px dashed rgba(74, 79, 106, 0.3);
-        }
-        section:last-of-type {
-            border-bottom: none;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-        
-        .form-group {
-            padding: 20px;
-            border: 2px solid var(--input-bg);
-            border-radius: 12px;
-            background-color: #242940; /* Slightly lighter card for better contrast */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            transition: transform 0.2s;
-        }
-        .form-group:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-        }
-
-        .form-group label {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--accent-secondary); 
-            margin-bottom: 8px;
-            display: block;
-        }
-        
-        /* Input and Select Styling (Standard Dropdowns) */
-        select.form-control, input.form-control {
-            background-color: var(--input-bg);
-            /* FIX 4 (ULTRA CRITICAL): Use -webkit-appearance: none to disable native OS styling, 
-               then force color/background to ensure selected text is always visible and readable. */
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            color: #FFFFFF !important; /* Force text white */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="%23E6EAF0" d="M7.7 10.7l-4-4L4.7 6l3 3 3-3 1 1-4 4z"/></svg>') !important;
-            background-repeat: no-repeat !important;
-            background-position: right 10px center !important;
-            padding-right: 30px; /* Make space for custom arrow */
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        select.form-control:focus, input.form-control:focus {
-             background-color: #30354e;
-             border-color: var(--accent-primary);
-             box-shadow: 0 0 10px rgba(56, 182, 255, 0.7); 
-        }
-        
-        /* Options within the SELECT list (Opened menu) */
-        select.form-control option {
-            /* While appearance is changed, we still enforce high contrast for the opened menu content */
-            color: #FFFFFF !important; 
-            background-color: var(--primary-bg) !important;
-            font-weight: 400;
-        }
-        
-        /* Optional: Apply bold to specific options using data-attribute */
-        select.form-control option[data-bold] {
-            font-weight: 700 !important;
-            color: var(--accent-secondary) !important;
-        }
-
-
-        /* Button Styling (Bootstrap Dropdowns) */
-        .btn {
-            font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
-            border: none !important;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Specific Button Colors - More vibrant and distinct */
-        #bootstrapButton { background-color: #7289DA; } /* Discord Blue-Gray */
-        #bootstrapButton:hover { background-color: #839bfa; }
-
-        #multiLevelToggle { background-color: var(--button-red); } 
-        #multiLevelToggle:hover { background-color: #f06292; }
-        
-        #hiddenToggle { background-color: #9B59B6; } /* Amethyst Purple */
-        #hiddenToggle:hover { background-color: #af7ac5; }
-        
-        #floatingToggle { background-color: #F1C40F; color: #1e1e2d; } /* Bright Yellow */
-        #floatingToggle:hover { background-color: #f7d54e; }
-
-        #pointingToggle { background-color: var(--accent-secondary); color: #1e1e2d; } /* Neon Green */
-        #pointingToggle:hover { background-color: #1affb0; }
-
-
-        /* Dropdown Menu Overrides (Bootstrap Menu) */
-        .dropdown-menu {
-            background-color: var(--input-bg);
-            border: 1px solid var(--accent-primary);
-            border-radius: 8px;
-            padding: 5px 0;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.7);
-        }
-        .dropdown-item {
-            color: var(--text-color);
-            padding: 10px 15px;
-            transition: background-color 0.2s, color 0.2s;
-            font-weight: 500;
-        }
-        
-        /* Dropdown Item Hover for high visibility */
-        .dropdown-item:hover, .dropdown-item:focus {
-            background-color: var(--accent-primary); 
-            color: #FFFFFF; 
-            font-weight: 600;
-            text-shadow: none;
-        }
-        
-        /* Custom Bold/Styling for Bootstrap Menu Items */
-        .dropdown-item.bold-item {
-            font-weight: 700;
-            color: var(--accent-secondary);
-        }
-
-        /* Pointing Dropdown (Custom CSS Arrow Simulation) */
-        .pointing-dropdown {
-            position: relative;
-        }
-        .pointing-dropdown .dropdown-menu::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 10px solid var(--accent-primary); /* Arrow matches accent color */
-        }
-
-        /* Footer and Utility Text */
-        footer {
-            padding-top: 40px;
-            margin-top: 40px;
-            border-top: 2px dashed #30354e;
-        }
-        .text-muted {
-            color: #aeb2c8 !important; 
-            display: block;
-            margin-top: 8px;
-            font-size: 0.85rem;
-            font-style: italic;
-        }
-
-    </style>
+  <meta charset="UTF-8">
+  <title>Comprehensive Dropdown Testing Playground</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root {
+      --bg: #181b24;
+      --card: #23273a;
+      --primary: #426de7;
+      --accent: #32bdee;
+      --border: #393f56;
+      --text: #f4f7fa;
+      --text-light: #c9ceda;
+    }
+    body {background:var(--bg); color:var(--text); font-family:sans-serif;}
+    .container {max-width:1115px;margin:36px auto;padding:28px;background:var(--card);border-radius:16px;}
+    h1 {color:var(--accent);margin-bottom:25px;text-align:center;}
+    .section {background:#1e2231;padding:12px 18px 8px 18px;border-radius:11px;margin-bottom:18px;}
+    .section h2 {color:var(--primary);margin-bottom:11px;}
+    .row {display:flex;flex-wrap:wrap;gap:33px 24px;align-items:flex-start;}
+    .dropdown-group {display:flex;flex-direction:column;gap:4px;min-width:230px;max-width:315px;margin-bottom:8px;}
+    label {font-size:1em;color:var(--text-light);}
+    select, input[type="text"] {
+      font-size:1em; padding:8px 10px; border-radius:6px; background:var(--card); color:var(--text); border:1px solid var(--border); outline:none; width:100%; margin-bottom:1px; margin-top:2px; transition:border-color .2s;}
+    select:focus, input[type="text"]:focus {border:1.25px solid var(--primary);}
+    .selected-value {color:var(--accent);margin-top:3px;}
+    /* Hidden dropdown */
+    .hidden-dropdown {display:none;}
+    /* Combo box & search dropdown */
+    .combo-wrap {position:relative;}
+    .combo-popup {display:none;position:absolute;left:0;top:108%;width:100%;background:var(--card);color:var(--text);border:1.2px solid var(--border);border-radius:6px;box-shadow:0 2px 10px #212a3e48;max-height:143px;overflow-y:auto;z-index:12;}
+    .combo-popup.active {display:block;}
+    .combo-option {padding:8px 12px;cursor:pointer;}
+    .combo-option:hover, .combo-option.active {background:var(--primary);color:#fff;}
+    /* Multiselect tag */
+    .multiselect-box {background:var(--card);min-height:38px;border:1.1px solid var(--border);border-radius:6px;padding:5px 9px;position:relative;display:flex;flex-wrap:wrap;gap:4px;cursor:pointer;align-items:center;}
+    .tag {background:var(--primary);color:#fff;border-radius:6px;padding:2px 8px;display:inline-flex;align-items:center;}
+    .tag-close {margin-left:5px;cursor:pointer;color:var(--bg);}
+    .multi-popup {position:absolute;left:0;top:105%;min-width:100%;background:var(--card);border:1px solid var(--border);border-radius:7px;z-index:20;padding:4px 0;box-shadow:0 3px 18px #23273a37;max-height:140px;overflow:auto;display:none;}
+    .multi-popup.active {display:block;}
+    .multi-popup-option {padding:9px 13px;cursor:pointer;}
+    .multi-popup-option:hover {background:#426de7;color:#fff;}
+    /* Checkbox dropdown */
+    .checkbox-btn{padding:9px 16px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;}
+    .checkbox-dd-list {display:none;position:absolute;left:0;top:44px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 0;z-index:17;min-width:175px;box-shadow:0 2px 12px #23273a12;}
+    .checkbox-dd-list.active {display:block;}
+    .checkbox-item {display:flex;align-items:center;gap:9px;padding:7px 9px;cursor:pointer;}
+    .checkbox-item:hover {background:var(--primary);color:#fff;}
+    .checkbox-wrap {position:relative;}
+    /* Floating dropdown */
+    .floating-wrap {position:relative;}
+    .floating-btn {padding:10px 23px;background:var(--accent);color:#181b24;font-size:1em;border:none;border-radius:7px;cursor:pointer;}
+    .floating-dd {display:none;position:absolute;top:48px;left:0;width:170px;background:var(--card);border:1px solid var(--border);border-radius:7px;box-shadow:0 4px 13px #15204554;z-index:32;}
+    .floating-dd.active {display:block;}
+    .floating-dd-option {padding:10px 12px;cursor:pointer;}
+    .floating-dd-option:hover {background:var(--primary);color:#fff;}
+    /* Multi-level dropdown */
+    .multilvl-wrap {display:flex;flex-direction:column;}
+    .levels-wrap {display:flex;gap:13px;}
+    .parent-menu,.child-menu,.subchild-menu {
+      background:var(--card);border:1px solid var(--border);border-radius:7px;box-shadow:0 1px 8px #23273a33;
+      min-width:105px;max-height:128px;overflow-y:auto;padding:4px 0;margin-top:7px;}
+    .level-option {padding:8px 13px;cursor:pointer;}
+    .level-option:hover, .level-option.active {background:var(--primary);color:#fff;}
+    /* Inline dropdown */
+    .inline-dropdown {display:inline-block;width:auto;vertical-align:middle;background:var(--card);color:var(--text);}
+    /* Bootstrap style menu */
+    .boot-menu-wrap{position:relative;}
+    .boot-trigger{padding:9px 21px;background:var(--primary);color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:0.98em;}
+    .boot-menu{display:none;position:absolute;left:0;top:42px;background:var(--card);border:1.2px solid var(--border);border-radius:7px;min-width:170px;z-index:22;box-shadow:0 2px 13px #23273a29;}
+    .boot-menu.active{display:block;}
+    .boot-menu-item{padding:10px 15px;cursor:pointer;}
+    .boot-menu-item:hover{background:var(--primary);color:#fff;}
+    /* Pointing dropdown arrow styling */
+    .pointing-dropdown{position:relative;width:100%;}
+    .pointing-dropdown::after{
+      content: "";
+      position: absolute;
+      left: 15px;
+      top: 95%;
+      width: 0; height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid var(--border);
+    }
+    /* DropdownList (radio) */
+    .dropdown-list-wrap {background:var(--card);padding:7px 12px;border-radius:6.5px;margin-top:7px;box-shadow:0 1px 8px #23273a11;}
+    .dropdown-group input[type="checkbox"] {accent-color:var(--primary);}
+    .dropdown-group input[type="radio"] {accent-color:var(--primary);}
+    @media (max-width:880px) { .row{flex-direction:column;gap:19px;} }
+  </style>
 </head>
 <body>
-
-    <div class="container">
-        <header class="pb-4">
-            <h1 class="header-title">Automated Dropdown Testing Sandbox</h1>
-            <p class="text-lg" style="color: #c7d2e8;">A highly stylized, comprehensive collection of dropdown elements for Selenium/Java automation practice. All functionality is live and locators are exposed.</p>
-        </header>
-        
-        <!-- Standard HTML Select Dropdowns -->
-        <section>
-            <h2 class="section-title">1. Standard HTML Select Dropdowns (Items 1-3)</h2>
-            <div class="grid-container">
-
-                <!-- 1. Standard Dropdown (Primary Locators: ID, Name) -->
-                <div class="form-group">
-                    <label for="standardDropdown">1. Standard Dropdown (15 Options)</label>
-                    <select class="form-control" id="standardDropdown" name="standard_selection_name" data-test-type="standard-select">
-                        <option value="default" selected disabled>Choose a Project Category</option>
-                        <option value="p01">Project Alpha (Core)</option>
-                        <option value="p02">Project Beta</option>
-                        <option value="p03">Project Gamma</option>
-                        <option value="p04">Project Delta</option>
-                        <option value="p05">Project Epsilon</option>
-                        <option value="p06" data-bold>Project Zeta (High Priority)</option>
-                        <option value="p07">Project Eta</option>
-                        <option value="p08">Project Theta</option>
-                        <option value="p09">Project Iota</option>
-                        <option value="p10">Project Kappa</option>
-                        <option value="p11">Project Lambda</option>
-                        <option value="p12">Project Mu</option>
-                        <option value="p13">Project Nu</option>
-                        <option value="p14">Project Xi</option>
-                        <option value="p15">Project Omicron</option>
-                    </select>
-                    <small class="text-muted">Target by ID: **standardDropdown**</small>
-                </div>
-
-                <!-- 2. Multi-Select Dropdown (Custom Attribute for Testing) -->
-                <div class="form-group">
-                    <label for="multiSelectDropdown">2. Multi Select Dropdown (12 Items)</label>
-                    <select multiple class="form-control" id="multiSelectDropdown" data-automation-id="multi-test-target" style="height: 180px;">
-                        <option value="A">Item A - Core Feature</option>
-                        <option value="B">Item B - New Module</option>
-                        <option value="C">Item C - Legacy Code</option>
-                        <option value="D" data-bold>Item D - Required Fix</option>
-                        <option value="E">Item E - Optional Component</option>
-                        <option value="F">Item F - Dependency Check</option>
-                        <option value="G">Item G - API Integration</option>
-                        <option value="H">Item H - UI Update</option>
-                        <option value="I">Item I - Database Query</option>
-                        <option value="J">Item J - Logging Service</option>
-                        <option value="K">Item K - Security Patch</option>
-                        <option value="L">Item L - Documentation</option>
-                    </select>
-                    <small class="text-muted">Target by Custom Attr: **data-automation-id**</small>
-                </div>
-                
-                <!-- 3. DropdownList (Semantic name for a standard select) -->
-                <div class="form-group">
-                    <label for="dropdownList">3. DropdownList (20 Options)</label>
-                    <select class="form-control dropdown-list-component" id="dropdownList" name="list_name_check">
-                        <option value="opt01">List Option 01</option>
-                        <option value="opt02">List Option 02</option>
-                        <option value="opt03">List Option 03</option>
-                        <option value="opt04">List Option 04</option>
-                        <option value="opt05">List Option 05</option>
-                        <option value="opt06">List Option 06</option>
-                        <option value="opt07">List Option 07</option>
-                        <option value="opt08">List Option 08</option>
-                        <option value="opt09" data-bold>List Option 09 (Special Case)</option>
-                        <option value="opt10">List Option 10</option>
-                        <option value="opt11">List Option 11</option>
-                        <option value="opt12">List Option 12</option>
-                        <option value="opt13">List Option 13</option>
-                        <option value="opt14">List Option 14</option>
-                        <option value="opt15">List Option 15</option>
-                        <option value="opt16">List Option 16</option>
-                        <option value="opt17">List Option 17</option>
-                        <option value="opt18">List Option 18</option>
-                        <option value="opt19">List Option 19</option>
-                        <option value="opt20">List Option 20</option>
-                    </select>
-                    <small class="text-muted">Target by Class: **dropdown-list-component**</small>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Custom UI & Advanced Dropdowns -->
-        <section>
-            <h2 class="section-title">2. Custom UI & Advanced Dropdowns (Items 4-6)</h2>
-            <div class="grid-container">
-
-                <!-- 4. Bootstrap Dropdown (Non-Select element) -->
-                <div class="form-group">
-                    <label>4. Bootstrap Dropdown (10 Options)</label>
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" id="bootstrapButton" data-toggle="dropdown" aria-expanded="false" data-selenium-test="btn-target">
-                            Click Menu
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="bootstrapButton">
-                            <a class="dropdown-item" href="#" data-item-value="link1">Bootstrap Link 01</a>
-                            <a class="dropdown-item" href="#" data-item-value="link2">Bootstrap Link 02</a>
-                            <a class="dropdown-item bold-item" href="#" data-item-value="link3">Bootstrap Link 03 (Bold)</a>
-                            <a class="dropdown-item" href="#" data-item-value="link4">Bootstrap Link 04</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#" data-item-value="link5">Bootstrap Link 05</a>
-                            <a class="dropdown-item" href="#" data-item-value="link6">Bootstrap Link 06</a>
-                            <a class="dropdown-item" href="#" data-item-value="link7">Bootstrap Link 07</a>
-                            <a class="dropdown-item" href="#" data-item-value="link8">Bootstrap Link 08</a>
-                            <a class="dropdown-item" href="#" data-item-value="link9">Bootstrap Link 09</a>
-                            <a class="dropdown-item" href="#" data-item-value="link10">Bootstrap Link 10</a>
-                        </div>
-                    </div>
-                    <small class="text-muted">Target button by ID: **bootstrapButton**</small>
-                </div>
-
-                <!-- 5. Combo Box / Search Dropdown (Datalist for input filtering) -->
-                <div class="form-group">
-                    <label for="searchComboInput">5. Combo Box / Search Dropdown (15 Cities)</label>
-                    <input type="text" class="form-control" id="searchComboInput" placeholder="Type or Select City (15 options)" list="cityOptions" name="city_combo_name" required>
-                    <datalist id="cityOptions">
-                        <option value="New York City">
-                        <option value="Los Angeles">
-                        <option value="Chicago">
-                        <option value="Houston">
-                        <option value="Phoenix">
-                        <option value="Philadelphia">
-                        <option value="San Antonio">
-                        <option value="San Diego">
-                        <option value="Dallas">
-                        <option value="San Jose">
-                        <option value="Austin">
-                        <option value="Jacksonville">
-                        <option value="San Francisco">
-                        <option value="Columbus">
-                        <option value="Fort Worth">
-                    </datalist>
-                    <small class="text-muted">Target input by Name: **city_combo_name**</small>
-                </div>
-
-                <!-- 6. Multi-level Dropdown (Nested Bootstrap menus) -->
-                <div class="form-group">
-                    <label>6. Multi-level Dropdown (14 Items)</label>
-                    <div class="dropdown" id="multiLevelContainer">
-                        <button class="btn dropdown-toggle" type="button" id="multiLevelToggle" data-toggle="dropdown" aria-expanded="false">
-                            Departments
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="multiLevelToggle">
-                            <a class="dropdown-item" href="#">Sales - Region A</a>
-                            <a class="dropdown-item" href="#">Sales - Region B</a>
-                            <a class="dropdown-item" href="#">Marketing - Digital</a>
-                            <a class="dropdown-item" href="#">Marketing - PR</a>
-                            <div class="dropdown-divider"></div>
-                            <!-- Nested Submenu -->
-                            <div class="dropdown dropright">
-                                <a class="dropdown-item dropdown-toggle bold-item" id="subMenuToggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Engineering (8 Sub-Options)
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="subMenuToggle" style="margin-left: 100%; margin-top: -30px;">
-                                    <a class="dropdown-item" href="#" id="L2Frontend">Frontend (L2)</a>
-                                    <a class="dropdown-item" href="#">Backend (L2)</a>
-                                    <a class="dropdown-item" href="#">DevOps (L2)</a>
-                                    <a class="dropdown-item" href="#">Data Science (L2)</a>
-                                    <a class="dropdown-item" href="#">QA (L2)</a>
-                                    <a class="dropdown-item" href="#">Security (L2)</a>
-                                    <a class="dropdown-item" href="#">Mobile (L2)</a>
-                                    <a class="dropdown-item" href="#">Embedded (L2)</a>
-                                </div>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Finance</a>
-                            <a class="dropdown-item" href="#">HR</a>
-                        </div>
-                    </div>
-                    <small class="text-muted">Target L2 item by ID: **L2Frontend**</small>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Visibility & Aesthetic Dropdowns -->
-        <section>
-            <h2 class="section-title">3. Hidden, Floating, and Pointing Dropdowns (Items 7-9)</h2>
-            <div class="grid-container">
-
-                <!-- 7. Hidden Dropdown (Initially display: none) -->
-                <div class="form-group">
-                    <label>7. Hidden Dropdown (10 Items)</label>
-                    <div class="dropdown">
-                        <button class="btn" type="button" id="hiddenToggle">
-                            Toggle Hidden Menu
-                        </button>
-                        <!-- Menu is initially hidden using style, must be made visible to interact -->
-                        <div class="dropdown-menu" id="hiddenDropdownMenu" style="display: none;">
-                            <a class="dropdown-item" href="#" data-hidden-item="H1">Secret Option 1 (A)</a>
-                            <a class="dropdown-item" href="#">Secret Option 2 (B)</a>
-                            <a class="dropdown-item" href="#">Secret Option 3 (C)</a>
-                            <a class="dropdown-item bold-item" href="#">Secret Option 4 (D)</a>
-                            <a class="dropdown-item" href="#">Secret Option 5 (E)</a>
-                            <a class="dropdown-item" href="#">Secret Option 6 (F)</a>
-                            <a class="dropdown-item" href="#">Secret Option 7 (G)</a>
-                            <a class="dropdown-item" href="#">Secret Option 8 (H)</a>
-                            <a class="dropdown-item" href="#">Secret Option 9 (I)</a>
-                            <a class="dropdown-item" href="#">Secret Option 10 (J)</a>
-                        </div>
-                    </div>
-                    <small class="text-muted">Target hidden item by Attr: **data-hidden-item**</small>
-                    <script>
-                        document.getElementById('hiddenToggle').onclick = function() {
-                            const menu = document.getElementById('hiddenDropdownMenu');
-                            // Toggle visibility using block/none display for testing hidden elements
-                            menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
-                        };
-                    </script>
-                </div>
-
-                <!-- 8. Floating Dropdown (Simulated hover, relies on Selenium Actions) -->
-                <div class="form-group">
-                    <label>8. Floating Dropdown (10 Items)</label>
-                    <div class="dropdown" onmouseover="this.querySelector('.dropdown-menu').style.display='block'" onmouseout="this.querySelector('.dropdown-menu').style.display='none'">
-                        <button class="btn" type="button" id="floatingToggle" name="floating_toggle_name">
-                            Mouse Over To Float
-                        </button>
-                        <div class="dropdown-menu" style="position:absolute; margin-top: 5px;" data-test="floating-menu">
-                            <span class="dropdown-item">Floating Item 01</span>
-                            <span class="dropdown-item">Floating Item 02</span>
-                            <span class="dropdown-item bold-item">Floating Item 03 (Bold)</span>
-                            <span class="dropdown-item">Floating Item 04</span>
-                            <span class="dropdown-item">Floating Item 05</span>
-                            <span class="dropdown-item">Floating Item 06</span>
-                            <span class="dropdown-item">Floating Item 07</span>
-                            <span class="dropdown-item">Floating Item 08</span>
-                            <span class="dropdown-item">Floating Item 09</span>
-                            <span class="dropdown-item">Floating Item 10</span>
-                        </div>
-                    </div>
-                    <small class="text-muted">Target toggle by Name: **floating_toggle_name**</small>
-                </div>
-                
-                <!-- 9. Pointing Dropdown (Stylistic variation of Bootstrap) -->
-                <div class="form-group">
-                    <label>9. Pointing Dropdown (12 Items)</label>
-                    <div class="dropdown pointing-dropdown">
-                        <button class="btn dropdown-toggle" type="button" id="pointingToggle" data-toggle="dropdown" aria-expanded="false">
-                            Pointing Menu
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="pointingToggle" data-test-pointing="target-menu">
-                            <a class="dropdown-item" href="#">Pointing Option 01</a>
-                            <a class="dropdown-item" href="#">Pointing Option 02</a>
-                            <a class="dropdown-item" href="#">Pointing Option 03</a>
-                            <a class="dropdown-item bold-item" href="#">Pointing Option 04 (Crucial)</a>
-                            <a class="dropdown-item" href="#">Pointing Option 05</a>
-                            <a class="dropdown-item" href="#">Pointing Option 06</a>
-                            <a class="dropdown-item" href="#">Pointing Option 07</a>
-                            <a class="dropdown-item" href="#">Pointing Option 08</a>
-                            <a class="dropdown-item" href="#">Pointing Option 09</a>
-                            <a class="dropdown-item" href="#">Pointing Option 10</a>
-                            <a class="dropdown-item" href="#">Pointing Option 11</a>
-                            <a class="dropdown-item" href="#">Pointing Option 12</a>
-                        </div>
-                    </div>
-                    <small class="text-muted">Target menu by Attr: **data-test-pointing**</small>
-                </div>
-
-            </div>
-        </section>
-        
-        <!-- 10. Inline Dropdown -->
-        <section>
-            <h2 class="section-title">4. Inline Dropdown (Item 10)</h2>
-            <div class="form-group">
-                <label>10. Inline Dropdown (10 Items)</label>
-                <p class="text-base" style="color: #c7d2e8;">
-                    Please select the document <span class="dropdown" style="display: inline-block;">
-                        <select class="form-control inline-select-class" id="inlineDropdown" name="inline_dropdown_name" style="width: auto; display: inline-block; vertical-align: middle; height: 38px;">
-                            <option value="PDF">PDF Report</option>
-                            <option value="DOCX">DOCX Document</option>
-                            <option value="CSV">CSV Data File</option>
-                            <option value="XLSX">XLSX Spreadsheet</option>
-                            <option value="XML">XML Data Feed</option>
-                            <option value="JSON">JSON Configuration</option>
-                            <option value="TXT">TXT Plain Text</option>
-                            <option value="PNG">PNG Image</option>
-                            <option value="JPG">JPG Image</option>
-                            <option value="ZIP">ZIP Archive</option>
-                        </select>
-                    </span> format for your download.
-                </p>
-                <small class="text-muted">Target by Name: **inline_dropdown_name**</small>
-            </div>
-        </section>
-        
-        
-        <footer class="pt-6 border-t border-gray-700 mt-8">
-            <h3 class="text-xl font-semibold text-accent-primary mb-3">Locator Quick Reference</h3>
-            <p style="color: #aeb2c8;">Use these attributes in your Java/Selenium test code:</p>
-            <ul class="list-disc list-inside text-sm" style="color: #aeb2c8;">
-                <li>**By.id():** `standardDropdown`, `multiSelectDropdown`, `searchComboInput`, `L2Frontend`</li>
-                <li>**By.name():** `standard_selection_name`, `city_combo_name`, `inline_dropdown_name`</li>
-                <li>**By.className():** `inline-select-class`, `dropdown-list-component`</li>
-                <li>**By.cssSelector() / By.xpath():** <br> e.g., `button[data-selenium-test='btn-target']` or `div[data-test='floating-menu']`</li>
-            </ul>
-        </footer>
-
+<div class="container">
+  <h1>Full Dropdown Types Playground</h1>
+  <div class="section">
+    <h2>Standard, Inline & Hidden Dropdowns</h2>
+    <div class="row">
+      <div class="dropdown-group">
+        <label for="std-dd">Standard Dropdown</label>
+        <select id="std-dd" name="stdDrop" class="seldrop" data-test="standard-sel">
+          <option value="">-- Select --</option>
+          <option value="A">Option A</option><option value="B">Option B</option>
+          <option value="C">Option C</option><option value="D">Option D</option>
+          <option value="E">Option E</option><option value="F">Option F</option>
+          <option value="G">Option G</option><option value="H">Option H</option>
+          <option value="I">Option I</option><option value="J">Option J</option>
+          <option value="K">Option K</option><option value="L">Option L</option>
+        </select>
+      </div>
+      <div class="dropdown-group">
+        <label>Inline Dropdown</label>
+        <select class="inline-dropdown" id="inline-dd" name="inlineDrop">
+          <option value="in1">Inline 1</option>
+          <option value="in2">Inline 2</option>
+          <option value="in3">Inline 3</option>
+          <option value="in4">Inline 4</option>
+        </select>
+        Inline use continues...
+      </div>
+      <div class="dropdown-group">
+        <label for="pointing-dd">Pointing Dropdown</label>
+        <select id="pointing-dd" class="pointing-dropdown">
+          <option value="pt1">Point 1</option>
+          <option value="pt2">Point 2</option>
+          <option value="pt3">Point 3</option>
+          <option value="pt4">Point 4</option>
+          <option value="pt5">Point 5</option>
+        </select>
+      </div>
+      <div class="dropdown-group">
+        <label for="hidden-dd">Hidden Dropdown</label>
+        <select id="hidden-dd" class="hidden-dropdown" data-test="hiddenTestDropdown">
+          <option value="h1">Hidden 1</option>
+          <option value="h2">Hidden 2</option>
+          <option value="h3">Hidden 3</option>
+          <option value="h4">Hidden 4</option>
+        </select>
+        (Not visible, but in HTML)
+      </div>
     </div>
+  </div>
 
+  <div class="section">
+    <h2>Multi-Select & Checkbox Dropdowns</h2>
+    <div class="row">
+      <div class="dropdown-group">
+        <label>Multi-select Tag Box</label>
+        <div class="multiselect-box" id="multi-tag-sel" tabindex="0"></div>
+        <div class="selected-value" id="multi-tag-value"></div>
+      </div>
+      <div class="dropdown-group checkbox-wrap">
+        <label>Checkbox Dropdown</label>
+        <button class="checkbox-btn" id="checkbox-trigger">Open Checkbox Dropdown</button>
+        <div class="checkbox-dd-list" id="checkbox-dd-list"></div>
+        <div id="checkbox-selected" class="selected-value"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Combo Box & Search Dropdowns</h2>
+    <div class="row">
+      <div class="dropdown-group combo-wrap">
+        <label>Combo Box Dropdown (single)</label>
+        <input type="text" id="combo-in" class="combo-input" autocomplete="off" placeholder="Type or select...">
+        <div id="combo-popup" class="combo-popup"></div>
+        <div id="combo-selected" class="selected-value"></div>
+      </div>
+      <div class="dropdown-group combo-wrap">
+        <label>Search Dropdown (multi-select)</label>
+        <input type="text" id="searchmulti-in" class="combo-input" autocomplete="off" placeholder="Type or multi-select...">
+        <div id="searchmulti-popup" class="combo-popup"></div>
+        <div id="searchmulti-selected" class="selected-value"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>DropdownList (Radio Buttons) & Bootstrap Style Dropdown</h2>
+    <div class="row">
+      <div class="dropdown-group">
+        <label>Dropdown List (Radio)</label>
+        <div class="dropdown-list-wrap" id="dropdown-list">
+          <input type="radio" name="rdl" id="rdl1" value="D1"><label for="rdl1">Dropdown A</label><br>
+          <input type="radio" name="rdl" id="rdl2" value="D2"><label for="rdl2">Dropdown B</label><br>
+          <input type="radio" name="rdl" id="rdl3" value="D3"><label for="rdl3">Dropdown C</label><br>
+          <input type="radio" name="rdl" id="rdl4" value="D4"><label for="rdl4">Dropdown D</label>
+        </div>
+      </div>
+      <div class="dropdown-group boot-menu-wrap">
+        <label>Bootstrap-Style Dropdown</label>
+        <button type="button" class="boot-trigger" id="boot-trigger">Bootstrap Menu ▼</button>
+        <div class="boot-menu" id="boot-menu">
+          <div class="boot-menu-item">Action 1</div>
+          <div class="boot-menu-item">Action 2</div>
+          <div class="boot-menu-item">Action 3</div>
+          <div class="boot-menu-item">Action 4</div>
+          <div class="boot-menu-item">Action 5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Floating & Multi-level Dropdowns</h2>
+    <div class="row">
+      <div class="dropdown-group floating-wrap">
+        <label>Floating Dropdown</label>
+        <button class="floating-btn" id="floating-btn" type="button">Select an Option</button>
+        <div class="floating-dd" id="floating-dd"></div>
+        <div id="floating-selected" class="selected-value"></div>
+      </div>
+      <div class="dropdown-group multilvl-wrap">
+        <label>Multi-level Dropdown</label>
+        <div class="levels-wrap">
+          <div class="parent-menu" id="ml-parent"></div>
+          <div class="child-menu" id="ml-child"></div>
+          <div class="subchild-menu" id="ml-subchild"></div>
+        </div>
+        <div class="selected-value" id="ml-selected"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// Multi-select/Tag
+const multiOptions = ["Red","Blue","Green","Yellow","Purple","Orange","Pink","Black","White","Grey","Brown","Cyan"];
+const multiSelBox=document.getElementById("multi-tag-sel");
+let multiValues=[];
+function updateMultiTags(){
+  multiSelBox.innerHTML='';
+  multiValues.forEach(val=>{
+    const tag=document.createElement('span');
+    tag.className='tag'; tag.textContent=val;
+    const close=document.createElement('span');
+    close.className='tag-close';close.innerHTML='&times;';
+    close.onclick=e=>{multiValues=multiValues.filter(x=>x!==val);updateMultiTags();showSel();e.stopPropagation();}
+    tag.appendChild(close);multiSelBox.appendChild(tag);
+  });
+  let icon = document.createElement('span'); icon.textContent = ' ▼'; icon.style.marginLeft = "auto"; icon.style.color = "#5fa6ff";
+  icon.style.pointerEvents = "none"; multiSelBox.appendChild(icon);
+}
+function showSel(){document.getElementById("multi-tag-value").textContent=multiValues.length?"Selected: "+multiValues.join(", "):"";}
+let multiPopup;
+multiSelBox.onclick=function(e){
+  e.stopPropagation();
+  if (multiPopup){multiPopup.remove();multiPopup=null;return;}
+  multiPopup=document.createElement("div");
+  multiPopup.className="multi-popup active"; multiPopup.id="multi-popup";
+  multiOptions.forEach(item=>{
+    const opt=document.createElement("div");
+    opt.textContent=item; opt.className="multi-popup-option"+(multiValues.includes(item)?" active":"");
+    opt.onclick=ev=>{
+      if(!multiValues.includes(item))multiValues.push(item);
+      else multiValues=multiValues.filter(v=>v!==item);
+      updateMultiTags();showSel();multiPopup.remove();multiPopup=null;ev.stopPropagation();
+    }
+    multiPopup.appendChild(opt);
+  });
+  multiSelBox.appendChild(multiPopup);
+  document.addEventListener('click',()=>{if(multiPopup){multiPopup.remove();multiPopup=null;}},{once:true})
+};
+updateMultiTags();
+
+// Checkbox dropdown
+const checkboxBtn=document.getElementById("checkbox-trigger");
+const checkboxList=document.getElementById("checkbox-dd-list");
+const checkboxSelected=document.getElementById("checkbox-selected");
+const cbOptions=["One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve"];
+checkboxBtn.onclick=function(e){checkboxList.classList.toggle("active");e.stopPropagation();}
+checkboxList.innerHTML = cbOptions.map((o,idx)=>`
+  <div class="checkbox-item">
+    <input type="checkbox" id="cb-${idx}" value="${o}">
+    <label for="cb-${idx}">${o}</label>
+  </div>`).join('');
+checkboxList.onclick=function(e){
+  if(e.target.type==='checkbox'){
+    const sel=Array.from(checkboxList.querySelectorAll("input[type=checkbox]:checked")).map(x=>x.value);
+    checkboxSelected.textContent=sel.length?"Checked: "+sel.join(", "):"";
+  }
+}
+document.addEventListener("click",()=>checkboxList.classList.remove("active"));
+
+// Combo Box Dropdown (single)
+const comboOptions=["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima"];
+const comboInput=document.getElementById("combo-in");
+const comboPopup=document.getElementById("combo-popup");
+const comboSelected=document.getElementById("combo-selected");
+comboInput.addEventListener("focus", showComboPopup);
+comboInput.addEventListener("keyup", showComboPopup);
+comboInput.addEventListener("blur", ()=> setTimeout(()=> comboPopup.classList.remove("active"), 160));
+function showComboPopup() {
+  let v=comboInput.value.toLowerCase();
+  comboPopup.innerHTML="";
+  let foundOpts=comboOptions.filter(opt=>opt.toLowerCase().includes(v));
+  if (foundOpts.length) comboPopup.classList.add('active');
+  else comboPopup.classList.remove('active');
+  foundOpts.forEach(opt=>{
+    let div=document.createElement('div');
+    div.className="combo-option";
+    div.textContent=opt; div.setAttribute("data-value", opt);
+    div.onclick=(e)=>{comboInput.value=opt; comboPopup.classList.remove("active"); comboSelected.textContent = "Selected: " + opt;};
+    comboPopup.appendChild(div);
+  });
+}
+
+// Search Dropdown (multi-select)
+const searchMultiOpts=comboOptions.slice(),searchMultiInput=document.getElementById('searchmulti-in'),searchMultiPopup=document.getElementById('searchmulti-popup'),searchMultiSel=document.getElementById('searchmulti-selected');let sMultiVals=[];
+searchMultiInput.addEventListener("focus",showSearchMultiPopup);searchMultiInput.addEventListener("keyup",showSearchMultiPopup);
+searchMultiInput.addEventListener("blur",()=>setTimeout(()=>searchMultiPopup.classList.remove("active"),160));
+function showSearchMultiPopup(){
+  let v=searchMultiInput.value.toLowerCase();
+  searchMultiPopup.innerHTML="";
+  let its=searchMultiOpts.filter(opt=>opt.toLowerCase().includes(v));
+  if(its.length)searchMultiPopup.classList.add('active');else searchMultiPopup.classList.remove('active');
+  its.forEach(opt=>{
+    let div=document.createElement('div');
+    div.className="combo-option"+(sMultiVals.includes(opt)?" active":"");
+    div.textContent=opt;div.setAttribute("data-value",opt);
+    div.onclick=(e)=>{
+      if(!sMultiVals.includes(opt))sMultiVals.push(opt);
+      else sMultiVals=sMultiVals.filter(o=>o!==opt);
+      searchMultiSel.textContent=sMultiVals.length?"Selected: "+sMultiVals.join(", "):"";
+      searchMultiPopup.classList.remove("active");
+    };
+    searchMultiPopup.appendChild(div);
+  });
+}
+
+// Floating dropdown
+const floatButton=document.getElementById("floating-btn");
+const floatDropdown=document.getElementById("floating-dd");
+const floatSelected=document.getElementById("floating-selected");
+const floatOptions=["Circle","Square","Triangle","Pentagon","Star","Diamond","Heart","Oval","Parallelogram","Crescent","Hexagon","Cross"];
+floatButton.onclick=function(e){floatDropdown.classList.toggle('active');e.stopPropagation();}
+floatDropdown.innerHTML=floatOptions.map(opt=>`<div class="floating-dd-option" data-value="${opt}">${opt}</div>`).join('');
+floatDropdown.onclick=function(e){
+  if(e.target.classList.contains("floating-dd-option")){
+    floatButton.textContent=e.target.textContent;
+    floatSelected.textContent="Selected: "+e.target.textContent;
+    floatDropdown.classList.remove("active");
+  }
+}
+document.addEventListener("click",()=>floatDropdown.classList.remove("active"));
+
+// Bootstrap style dropdown
+const bootTrig=document.getElementById("boot-trigger"),bootMenu=document.getElementById("boot-menu");
+bootTrig.onclick=function(e){bootMenu.classList.toggle("active");e.stopPropagation();}
+bootMenu.onclick=function(e){if(e.target.classList.contains("boot-menu-item")){bootMenu.classList.remove("active");}}
+document.addEventListener("click",()=>bootMenu.classList.remove("active"));
+
+// Multi-level dropdown (3 levels)
+const mlParents=["Animals","Countries","Colors"];
+const mlChildren={Animals:["Dog","Cat","Tiger","Wolf","Horse","Elephant"],Countries:["India","USA","China","Brazil"],Colors:["Red","Green","Blue","Yellow"]};
+const mlSubchild={
+  Dog:["Bulldog","Pug","Husky"], Cat:["Siamese","Persian"], Tiger:["Bengal","Siberian"], India:["Delhi","Mumbai"], USA:["NY","LA"], Red:["Light Red","Dark Red"], Green:["Bright Green","Olive"], Blue:["Cyan","Navy"]
+};
+const mlParentBox=document.getElementById("ml-parent"),mlChildBox=document.getElementById("ml-child"),mlSubBox=document.getElementById("ml-subchild"),mlSel=document.getElementById("ml-selected");
+let selParent=null,selChild=null,selSub=null;mlParentBox.innerHTML=mlParents.map(p=>`<div class="level-option" data-parent="${p}">${p}</div>`).join('');
+mlParentBox.onclick=function(e){if(e.target.dataset.parent){selParent=e.target.dataset.parent;selChild=selSub=null;
+  mlChildBox.innerHTML=mlChildren[selParent].map(c=>`<div class="level-option" data-child="${c}">${c}</div>`).join('');mlSubBox.innerHTML='';mlSel.textContent='';
+  Array.from(mlParentBox.children).forEach(x=>x.classList.remove('active'));e.target.classList.add('active');}};
+mlChildBox.onclick=function(e){if(e.target.dataset.child){selChild=e.target.dataset.child;selSub=null;
+  if(mlSubchild[selChild])mlSubBox.innerHTML=mlSubchild[selChild].map(s=>`<div class="level-option" data-sub="${s}">${s}</div>`).join('');else mlSubBox.innerHTML='';
+  mlSel.textContent='';Array.from(mlChildBox.children).forEach(x=>x.classList.remove('active'));e.target.classList.add('active');}};
+mlSubBox.onclick=function(e){if(e.target.dataset.sub){selSub=e.target.dataset.sub;mlSel.textContent=`Selected: ${selParent} > ${selChild} > ${selSub}`;Array.from(mlSubBox.children).forEach(x=>x.classList.remove('active'));e.target.classList.add('active');}};
+</script>
 </body>
 </html>
