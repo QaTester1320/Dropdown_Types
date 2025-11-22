@@ -91,16 +91,24 @@
             background-color: #242940; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             transition: transform 0.2s;
-            position: relative; /* Base stacking context for z-index fix */
-            z-index: 1; 
+            position: relative; 
+            /* CRITICAL FIX 3: Ensure the card doesn't clip its children. Setting overflow to visible 
+               and ensuring z-index is lower than the menu (which is 1000) prevents clipping. */
+            overflow: visible; 
+            z-index: 5; /* Base stacking context for the card */
         }
         .form-group:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
         }
 
-        /* CRITICAL Z-INDEX FIX: Ensures menu is always on top of all cards */
+        /* CRITICAL Z-INDEX FIX: Ensures menu is always on top of all cards, and prevents parent clipping */
+        .dropdown, .dropup, .floating-dropdown-container {
+             /* Increase the stacking context for the dropdown container itself */
+             z-index: 10;
+        }
         .dropdown-menu {
+            /* This z-index is critical to make it float above everything else */
             z-index: 1000 !important; 
         }
         
@@ -225,9 +233,30 @@
             color: var(--accent-secondary);
         }
 
+        /* NEW STYLE: Visually mark the actively selected item in custom dropdown menus */
+        .dropdown-item.active, 
+        .dropdown-item.active:hover, 
+        .dropdown-item.active:focus {
+            background-color: #008778 !important; /* A darker shade of the neon green accent */
+            color: #FFFFFF !important;
+            font-weight: 700;
+            border-left: 4px solid var(--accent-primary);
+            padding-left: 11px; /* Adjust padding to accommodate the border */
+        }
+
         /* Pointing Dropdown (Custom CSS Arrow Simulation) */
         .pointing-dropdown {
             position: relative;
+        }
+        
+        /* Fix for Multi-Level Submenu clipping when parent is dropup */
+        #multiLevelContainer .dropdown-menu {
+            /* Position relative to the parent item, pushing it to the side */
+            top: auto;
+            right: auto;
+            left: 100%; /* Push it to the right */
+            margin-top: -30px; /* Align vertically with the parent item */
+            margin-left: 0; /* Remove old margin */
         }
 
 
@@ -472,7 +501,8 @@
                                 >
                                     Engineering (8 Sub-Options)
                                 </a>
-                                <div class="dropdown-menu" aria-labelledby="subMenuToggle" style="margin-left: 100%; margin-top: -30px;">
+                                <!-- CRITICAL FIX 4: Removed inline style for multi-level menu and relied on the new CSS rule -->
+                                <div class="dropdown-menu" aria-labelledby="subMenuToggle">
                                     <!-- NOTE: These L2 items WILL update the main button text -->
                                     <a class="dropdown-item" href="#" id="L2Frontend" data-test-value="EngFrontend">Frontend (L2)</a>
                                     <a class="dropdown-item" href="#" data-test-value="EngBackend">Backend (L2)</a>
@@ -506,9 +536,9 @@
                 <!-- 7. Hidden Dropdown (Initially display: none) - Retains original dropdown class for simpler custom scripting -->
                 <div class="form-group">
                     <label>7. Hidden Dropdown (10 Items)</label>
-                    <div class="dropdown"> 
+                    <div class="dropup"> <!-- Changed to dropup to prevent bottom clipping -->
                         <div class="dropdown-description">
-                            **Type:** Custom visibility toggle. Updates button text on click.
+                            **Type:** Custom visibility toggle. Updates button text on click. **Now opens UPWARDS.**
                         </div>
                         <button 
                             class="btn qa-dropdown-component" 
@@ -549,12 +579,12 @@
                     <label>8. Floating Dropdown (10 Items)</label>
                     <!-- Mouse events on the parent div containing both button and menu -->
                     <div 
-                        class="dropdown floating-dropdown-container"
+                        class="dropup floating-dropdown-container" /* Changed to dropup to prevent bottom clipping */
                         onmouseover="openFloatingMenu(this)" 
                         onmouseout="closeFloatingMenu(this)"
                     >
                         <div class="dropdown-description">
-                            **Type:** Custom hover trigger (onmouseover). **Now uses a delay/clear system for robust hovering.**
+                            **Type:** Custom hover trigger (onmouseover). **Now uses a delay/clear system for robust hovering and opens UPWARDS.**
                         </div>
                         <button 
                             class="btn qa-dropdown-component" 
@@ -719,15 +749,17 @@
                 // Prevent default link behavior (like navigating to '#')
                 e.preventDefault();
                 
+                const $clickedItem = $(this);
+                
                 // Get the text of the selected item, trimming any extra whitespace
-                const selectedText = $(this).text().trim();
+                const selectedText = $clickedItem.text().trim();
                 
                 // Find the closest parent dropdown container and then look for the toggle button.
-                const $dropdownContainer = $(this).closest('.dropdown, .dropup, .floating-dropdown-container');
+                const $dropdownContainer = $clickedItem.closest('.dropdown, .dropup, .floating-dropdown-container');
                 const $toggleButton = $dropdownContainer.find('.dropdown-toggle, [data-test-id^="DD-ITEM"]').first();
                 
                 // Exclude the sub-menu parent in Item 6, as it only opens the menu, it's not a selection
-                if ($(this).hasClass('sub-menu-parent')) {
+                if ($clickedItem.hasClass('sub-menu-parent')) {
                     // Do nothing for the parent link, just let the menu open/close logic handle it
                 } else {
                     // Update the button text with the selected value
@@ -736,6 +768,14 @@
                     } else if ($toggleButton.is('input')) {
                         $toggleButton.val(selectedText);
                     }
+
+                    // *** NEW FEATURE: Add 'active' class to the selected item for visual confirmation ***
+                    // 1. Clear 'active' from all items in this specific dropdown menu (including nested menus)
+                    $dropdownContainer.find('.dropdown-item').removeClass('active');
+
+                    // 2. Add 'active' to the currently clicked item
+                    $clickedItem.addClass('active');
+
                 }
                 
                 // For the Hidden Dropdown (Item 7), we must manually hide the menu as it's not a standard Bootstrap toggle
