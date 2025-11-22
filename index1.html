@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Dropdown Testing Sandbox (Definitive Fixes Applied)</title>
+    <!-- Bootstrap JS/CSS (Required for Multi-Level/Button Dropdowns functionality) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom CSS for Aesthetic Dark Mode (Overriding Bootstrap styles) -->
+    <style>
+        /* New Aesthetic Color Variables */
+        :root {
+            --primary-bg: #111421; /* Ultra Deep Blue/Black */
+            --secondary-bg: #1a1d2e; /* Card Background */
+            --accent-primary: #38B6FF; /* Electric Blue Accent */
+            --accent-secondary: #00DFA2; /* Neon Green Accent */
+            --text-color: #E6EAF0; /* Light Text */
+            --border-color: #4A4F6A;
+            --input-bg: #222638; /* Darker input to contrast with text */
+            --button-red: #E91E63; 
+        }
+
+        /* Base Body and Layout */
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif; 
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--secondary-bg);
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9); 
+        }
+
+        /* Typography and Headings */
+        .header-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--accent-primary);
+            text-shadow: 0 0 10px rgba(56, 182, 255, 0.5); 
+            border-bottom: 4px solid var(--accent-primary);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+        
+        /* Sections and Grids */
+        section {
+            padding: 30px 0;
+            border-bottom: 1px dashed rgba(74, 79, 106, 0.3);
+        }
+        section:last-of-type {
+            border-bottom: none;
+        }
+        
+        /* DEFINITIVE FIX 1: Add a very large spacer component AFTER the section with dropup menus (Section 2) */
+        #dropup-spacer {
+             height: 350px; /* Guarantee vertical space for upwards opening menus */
+             width: 100%;
+             margin: 0;
+             padding: 0;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .form-group {
+            padding: 20px;
+            border: 2px solid var(--input-bg);
+            border-radius: 12px;
+            background-color: #242940; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s;
+            position: relative; /* Base stacking context for z-index fix */
+            z-index: 1; 
+        }
+        .form-group:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        /* CRITICAL Z-INDEX FIX: Ensures menu is always on top of all cards */
+        .dropdown-menu {
+            z-index: 1000 !important; 
+        }
+        
+        /* Dropup Fix: Adjusts pointer position for the pointing dropdown when opening upwards */
+        .dropup.pointing-dropdown .dropdown-menu::before {
+            top: auto; /* Reset top position */
+            bottom: -10px; /* Position the arrow at the bottom */
+            border-top: 10px solid var(--accent-primary); /* Change arrow direction to point upwards */
+            border-bottom: none;
+        }
+        /* END OF Z-INDEX & DROPUP FIX */
+
+        
+        .form-group label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-secondary); 
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Dropdown Descriptions */
+        .dropdown-description {
+            font-size: 0.9rem;
+            color: #b0c4de; 
+            margin-bottom: 15px;
+            border-left: 3px solid var(--accent-primary);
+            padding-left: 10px;
+        }
+        
+        /* Input and Select Styling (Standard Dropdowns) */
+        select.form-control, input.form-control {
+            background-color: var(--input-bg);
+            /* Use -webkit-appearance: none to disable native OS styling */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            color: #FFFFFF !important; 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="%23E6EAF0" d="M7.7 10.7l-4-4L4.7 6l3 3 3-3 1 1-4 4z"/></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: right 10px center !important;
+            padding-right: 30px; 
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        select.form-control:focus, input.form-control:focus {
+             background-color: #30354e;
+             border-color: var(--accent-primary);
+             box-shadow: 0 0 10px rgba(56, 182, 255, 0.7); 
+        }
+        
+        /* Options within the SELECT list (Opened menu) */
+        select.form-control option {
+            color: #FFFFFF !important; 
+            background-color: var(--primary-bg) !important;
+            font-weight: 400;
+        }
+        
+        /* Optional: Apply bold to specific options using data-attribute */
+        select.form-control option[data-bold] {
+            font-weight: 700 !important;
+            color: var(--accent-secondary) !important;
+        }
+
+
+        /* Button Styling (Bootstrap Dropdowns) */
+        .btn {
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
+            border: none !important;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Specific Button Colors - More vibrant and distinct */
+        #bootstrapButton { background-color: #7289DA; } 
+        #bootstrapButton:hover { background-color: #839bfa; }
+
+        #multiLevelToggle { background-color: var(--button-red); } 
+        #multiLevelToggle:hover { background-color: #f06292; }
+        
+        #hiddenToggle { background-color: #9B59B6; } 
+        #hiddenToggle:hover { background-color: #af7ac5; }
+        
+        #floatingToggle { background-color: #F1C40F; color: #1e1e2d; } 
+        #floatingToggle:hover { background-color: #f7d54e; }
+
+        #pointingToggle { background-color: var(--accent-secondary); color: #1e1e2d; } 
+        #pointingToggle:hover { background-color: #1affb0; }
+
+
+        /* Dropdown Menu Overrides (Bootstrap Menu) */
+        .dropdown-menu {
+            background-color: var(--input-bg);
+            border: 1px solid var(--accent-primary);
+            border-radius: 8px;
+            padding: 5px 0;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.7);
+        }
+        .dropdown-item {
+            color: var(--text-color);
+            padding: 10px 15px;
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+        
+        /* Dropdown Item Hover for high visibility */
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: var(--accent-primary); 
+            color: #FFFFFF; 
+            font-weight: 600;
+            text-shadow: none;
+        }
+        
+        /* Custom Bold/Styling for Bootstrap Menu Items */
+        .dropdown-item.bold-item {
+            font-weight: 700;
+            color: var(--accent-secondary);
+        }
+
+        /* Pointing Dropdown (Custom CSS Arrow Simulation) */
+        .pointing-dropdown {
+            position: relative;
+        }
+
+
+        /* Footer and Utility Text */
+        footer {
+            padding-top: 40px;
+            margin-top: 40px;
+            border-top: 2px dashed #30354e;
+        }
+        .text-muted {
+            color: #aeb2c8 !important; 
+            display: block;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="pb-4">
+            <h1 class="header-title">Automated Dropdown Testing Sandbox</h1>
+            <p class="text-lg" style="color: #c7d2e8;">A highly stylized, comprehensive collection of dropdown elements for testing.</p>
+        </header>
+        
+        <!-- Standard HTML Select Dropdowns -->
+        <section>
+            <h2 class="section-title">1. Standard HTML Select Dropdowns (Items 1-3)</h2>
+            <div class="grid-container">
+
+                <!-- 1. Standard Dropdown (Primary Locators: ID, Name) -->
+                <div class="form-group">
+                    <label for="standardDropdown">1. Standard Dropdown (15 Options)</label>
+                    <div class="dropdown-description">
+                        **Type:** Native HTML &lt;select&gt; element. Has ID, Name, Class. Options have Value.
+                    </div>
+                    <select 
+                        class="form-control qa-dropdown-component" 
+                        id="standardDropdown" 
+                        name="qa_name_item1" 
+                        data-test-id="DD-ITEM-1-SELECT"
+                    >
+                        <option value="default" selected disabled>Choose a Project Category</option>
+                        <option value="p01" data-test-value="Project Alpha (Core)">Project Alpha (Core)</option>
+                        <option value="p02" data-test-value="Project Beta">Project Beta</option>
+                        <option value="p03" data-test-value="Project Gamma">Project Gamma</option>
+                        <option value="p04" data-test-value="Project Delta">Project Delta</option>
+                        <option value="p05" data-test-value="Project Epsilon">Project Epsilon</option>
+                        <option value="p06" data-bold data-test-value="Project Zeta (High Priority)">Project Zeta (High Priority)</option>
+                        <option value="p07" data-test-value="Project Eta">Project Eta</option>
+                        <option value="p08" data-test-value="Project Theta">Project Theta</option>
+                        <option value="p09" data-test-value="Project Iota">Project Iota</option>
+                        <option value="p10" data-test-value="Project Kappa">Project Kappa</option>
+                        <option value="p11" data-test-value="Project Lambda">Project Lambda</option>
+                        <option value="p12" data-test-value="Project Mu">Project Mu</option>
+                        <option value="p13" data-test-value="Project Nu">Project Nu</option>
+                        <option value="p14" data-test-value="Project Xi">Project Xi</option>
+                        <option value="p15" data-test-value="Project Omicron">Project Omicron</option>
+                    </select>
+                    <small class="text-muted">Target by ID: **standardDropdown**. Options target by Value: `p01`</small>
+                </div>
+
+                <!-- 2. Multi-Select Dropdown (Custom Attribute for Testing) -->
+                <div class="form-group">
+                    <label for="multiSelectDropdown">2. Multi Select Dropdown (12 Items)</label>
+                    <div class="dropdown-description">
+                        **Type:** Native HTML &lt;select multiple&gt;. Has ID, Name, Class. Options have Value.
+                    </div>
+                    <select 
+                        multiple 
+                        class="form-control qa-dropdown-component" 
+                        id="multiSelectDropdown" 
+                        name="qa_name_item2"
+                        data-test-id="DD-ITEM-2-MULTI-SELECT" 
+                        style="height: 180px;"
+                    >
+                        <option value="A" data-test-value="Item A - Core Feature">Item A - Core Feature</option>
+                        <option value="B" data-test-value="Item B - New Module">Item B - New Module</option>
+                        <option value="C" data-test-value="Item C - Legacy Code">Item C - Legacy Code</option>
+                        <option value="D" data-bold data-test-value="Item D - Required Fix">Item D - Required Fix</option>
+                        <option value="E" data-test-value="Item E - Optional Component">Item E - Optional Component</option>
+                        <option value="F" data-test-value="Item F - Dependency Check">Item F - Dependency Check</option>
+                        <option value="G" data-test-value="Item G - API Integration">Item G - API Integration</option>
+                        <option value="H" data-test-value="Item H - UI Update">Item H - UI Update</option>
+                        <option value="I" data-test-value="Item I - Database Query">Item I - Database Query</option>
+                        <option value="J" data-test-value="Item J - Logging Service">Item J - Logging Service</option>
+                        <option value="K" data-test-value="Item K - Security Patch">Item K - Security Patch</option>
+                        <option value="L" data-test-value="Item L - Documentation">Item L - Documentation</option>
+                    </select>
+                    <small class="text-muted">Target by Attr: **data-test-id**=`DD-ITEM-2-MULTI-SELECT`</small>
+                </div>
+                
+                <!-- 3. DropdownList (Semantic name for a standard select) -->
+                <div class="form-group">
+                    <label for="dropdownList">3. DropdownList (20 Options)</label>
+                    <div class="dropdown-description">
+                        **Type:** Standard HTML &lt;select&gt;. Has ID, Name, Class. Options have Value.
+                    </div>
+                    <select 
+                        class="form-control dropdown-list-component qa-dropdown-component" 
+                        id="dropdownList" 
+                        name="qa_name_item3"
+                        data-test-id="DD-ITEM-3-DROPDOWN-LIST"
+                    >
+                        <option value="opt01" data-test-value="List Option 01">List Option 01</option>
+                        <option value="opt02" data-test-value="List Option 02">List Option 02</option>
+                        <option value="opt03" data-test-value="List Option 03">List Option 03</option>
+                        <option value="opt04" data-test-value="List Option 04">List Option 04</option>
+                        <option value="opt05" data-test-value="List Option 05">List Option 05</option>
+                        <option value="opt06" data-test-value="List Option 06">List Option 06</option>
+                        <option value="opt07" data-test-value="List Option 07">List Option 07</option>
+                        <option value="opt08" data-test-value="List Option 08">List Option 08</option>
+                        <option value="opt09" data-bold data-test-value="List Option 09 (Special Case)">List Option 09 (Special Case)</option>
+                        <option value="opt10" data-test-value="List Option 10">List Option 10</option>
+                        <option value="opt11" data-test-value="List Option 11">List Option 11</option>
+                        <option value="opt12" data-test-value="List Option 12">List Option 12</option>
+                        <option value="opt13" data-test-value="List Option 13">List Option 13</option>
+                        <option value="opt14" data-test-value="List Option 14">List Option 14</option>
+                        <option value="opt15" data-test-value="List Option 15">List Option 15</option>
+                        <option value="opt16" data-test-value="List Option 16">List Option 16</option>
+                        <option value="opt17" data-test-value="List Option 17">List Option 17</option>
+                        <option value="opt18" data-test-value="List Option 18">List Option 18</option>
+                        <option value="opt19" data-test-value="List Option 19">List Option 19</option>
+                        <option value="opt20" data-test-value="List Option 20">List Option 20</option>
+                    </select>
+                    <small class="text-muted">Target by Class: **dropdown-list-component**</small>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Custom UI & Advanced Dropdowns -->
+        <section>
+            <h2 class="section-title">2. Custom UI & Advanced Dropdowns (Items 4-6)</h2>
+            <div class="grid-container">
+
+                <!-- 4. Bootstrap Dropdown (Non-Select element) - Dropup to prevent overlap -->
+                <div class="form-group">
+                    <label>4. Bootstrap Dropdown (10 Options)</label>
+                    <div class="dropup"> <!-- Class set to 'dropup' -->
+                        <div class="dropdown-description">
+                            **Type:** Bootstrap &lt;button&gt; trigger. Updates button text on click. **Menu opens UPWARDS.**
+                        </div>
+                        <button 
+                            class="btn dropdown-toggle qa-dropdown-component" 
+                            type="button" 
+                            id="bootstrapButton" 
+                            name="qa_name_item4_btn"
+                            data-toggle="dropdown" 
+                            aria-expanded="false" 
+                            data-test-id="DD-ITEM-4-BUTTON"
+                        >
+                            Click Menu
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="bootstrapButton">
+                            <a class="dropdown-item" href="#" data-test-value="link1">Bootstrap Link 01</a>
+                            <a class="dropdown-item" href="#" data-test-value="link2">Bootstrap Link 02</a>
+                            <a class="dropdown-item bold-item" href="#" data-test-value="link3-bold">Bootstrap Link 03 (Bold)</a>
+                            <a class="dropdown-item" href="#" data-test-value="link4">Bootstrap Link 04</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" data-test-value="link5">Bootstrap Link 05</a>
+                            <a class="dropdown-item" href="#" data-test-value="link6">Bootstrap Link 06</a>
+                            <a class="dropdown-item" href="#" data-test-value="link7">Bootstrap Link 07</a>
+                            <a class="dropdown-item" href="#" data-test-value="link8">Bootstrap Link 08</a>
+                            <a class="dropdown-item" href="#" data-test-value="link9">Bootstrap Link 09</a>
+                            <a class="dropdown-item" href="#" data-test-value="link10">Bootstrap Link 10</a>
+                        </div>
+                    </div>
+                    <small class="text-muted">Target button by ID: **bootstrapButton**. Option by Attr: `[data-test-value='link3-bold']`</small>
+                </div>
+
+                <!-- 5. Combo Box / Search Dropdown (Datalist for input filtering) -->
+                <div class="form-group">
+                    <label for="searchComboInput">5. Combo Box / Search Dropdown (15 Cities)</label>
+                    <div class="dropdown-description">
+                        **Type:** &lt;input&gt; + &lt;datalist&gt;. Input has ID, Name, Class. Values are in &lt;datalist&gt; options.
+                    </div>
+                    <input 
+                        type="text" 
+                        class="form-control qa-dropdown-component" 
+                        id="searchComboInput" 
+                        placeholder="Type or Select City (15 options)" 
+                        list="cityOptions" 
+                        name="qa_name_item5_input" 
+                        data-test-id="DD-ITEM-5-COMBO-BOX"
+                        required
+                    >
+                    <datalist id="cityOptions">
+                        <option value="New York City" data-test-value="NYC">
+                        <option value="Los Angeles" data-test-value="LA">
+                        <option value="Chicago" data-test-value="CHI">
+                        <option value="Houston" data-test-value="HOU">
+                        <option value="Phoenix" data-test-value="PHX">
+                        <option value="Philadelphia" data-test-value="PHI">
+                        <option value="San Antonio" data-test-value="SAT">
+                        <option value="San Diego" data-test-value="SD">
+                        <option value="Dallas" data-test-value="DAL">
+                        <option value="San Jose" data-test-value="SJ">
+                        <option value="Austin" data-test-value="AUS">
+                        <option value="Jacksonville" data-test-value="JAX">
+                        <option value="San Francisco" data-test-value="SF">
+                        <option value="Columbus" data-test-value="COL">
+                        <option value="Fort Worth" data-test-value="FW">
+                    </datalist>
+                    <small class="text-muted">Target input by Name: **qa_name_item5_input**</small>
+                </div>
+
+                <!-- 6. Multi-level Dropdown (Nested Bootstrap menus) - Dropup to prevent overlap -->
+                <div class="form-group">
+                    <label>6. Multi-level Dropdown (14 Items)</label>
+                    <div class="dropup" id="multiLevelContainer"> <!-- Class set to 'dropup' -->
+                        <div class="dropdown-description">
+                            **Type:** Nested Bootstrap Dropdown. Updates button text on click. **Menu opens UPWARDS.**
+                        </div>
+                        <button 
+                            class="btn dropdown-toggle qa-dropdown-component" 
+                            type="button" 
+                            id="multiLevelToggle" 
+                            name="qa_name_item6_btn"
+                            data-toggle="dropdown" 
+                            aria-expanded="false"
+                            data-test-id="DD-ITEM-6-BUTTON"
+                        >
+                            Departments
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="multiLevelToggle">
+                            <a class="dropdown-item" href="#" data-test-value="SalesA">Sales - Region A</a>
+                            <a class="dropdown-item" href="#" data-test-value="SalesB">Sales - Region B</a>
+                            <a class="dropdown-item" href="#" data-test-value="MktgDigital">Marketing - Digital</a>
+                            <a class="dropdown-item" href="#" data-test-value="MktgPR">Marketing - PR</a>
+                            <div class="dropdown-divider"></div>
+                            <!-- Nested Submenu - This item OPENS the sub-menu, not selects a value -->
+                            <div class="dropdown dropright">
+                                <a 
+                                    class="dropdown-item dropdown-toggle bold-item sub-menu-parent" 
+                                    id="subMenuToggle" 
+                                    data-dropdown-submenu="true" 
+                                    data-test-id="DD-ITEM-6-SUBMENU-TOGGLE"
+                                    href="#"
+                                >
+                                    Engineering (8 Sub-Options)
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="subMenuToggle" style="margin-left: 100%; margin-top: -30px;">
+                                    <!-- NOTE: These L2 items WILL update the main button text -->
+                                    <a class="dropdown-item" href="#" id="L2Frontend" data-test-value="EngFrontend">Frontend (L2)</a>
+                                    <a class="dropdown-item" href="#" data-test-value="EngBackend">Backend (L2)</a>
+                                    <a class="dropdown-item" href="#" data-test-value="EngDevOps">DevOps (L2)</a>
+                                    <a class="dropdown-item" href="#" data-test-value="EngData">Data Science (L2)</a>
+                                    <a class="dropdown-item" href="#" data-test-value="EngQA">QA (L2)</a>
+                                    <a class="dropdown-item" href="#" data-test-value="EngSecurity">Security (L2)</a>
+                                    <a class="dropdown-item" href="#" data-test-value="EngMobile">Mobile (L2)</a>
+                                    <a class="dropdown-item" href="#" data-test-value="EngEmbedded">Embedded (L2)</a>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" data-test-value="Finance">Finance</a>
+                            <a class="dropdown-item" href="#" data-test-value="HR">HR</a>
+                        </div>
+                    </div>
+                    <small class="text-muted">Target L2 item by ID: **L2Frontend**. Toggle by Attr: `[data-test-id='DD-ITEM-6-SUBMENU-TOGGLE']`</small>
+                </div>
+
+            </div>
+        </section>
+        
+        <!-- DEFINITIVE FIX 1: The spacer element that pushes the next section far down -->
+        <div id="dropup-spacer"></div>
+
+        <!-- Visibility & Aesthetic Dropdowns -->
+        <section>
+            <h2 class="section-title">3. Hidden, Floating, and Pointing Dropdowns (Items 7-9)</h2>
+            <div class="grid-container">
+
+                <!-- 7. Hidden Dropdown (Initially display: none) - Retains original dropdown class for simpler custom scripting -->
+                <div class="form-group">
+                    <label>7. Hidden Dropdown (10 Items)</label>
+                    <div class="dropdown"> 
+                        <div class="dropdown-description">
+                            **Type:** Custom visibility toggle. Updates button text on click.
+                        </div>
+                        <button 
+                            class="btn qa-dropdown-component" 
+                            type="button" 
+                            id="hiddenToggle"
+                            name="qa_name_item7_btn"
+                            data-test-id="DD-ITEM-7-BUTTON"
+                        >
+                            Toggle Hidden Menu
+                        </button>
+                        <!-- Menu is initially hidden using style, must be made visible to interact -->
+                        <div class="dropdown-menu" id="hiddenDropdownMenu" style="display: none;">
+                            <a class="dropdown-item" href="#" data-test-value="HiddenH1">Secret Option 1 (A)</a>
+                            <a class="dropdown-item" href="#" data-test-value="HiddenH2">Secret Option 2 (B)</a>
+                            <a class="dropdown-item" href="#" data-test-value="HiddenH3">Secret Option 3 (C)</a>
+                            <a class="dropdown-item bold-item" href="#" data-test-value="HiddenH4">Secret Option 4 (D)</a>
+                            <a class="dropdown-item" href="#" data-test-value="HiddenH5">Secret Option 5 (E)</a>
+                            <a class="dropdown-item" href="#" data-test-value="HiddenH6">Secret Option 6 (F)</a>
+                            <a class="dropdown-item" href="#" data-test-value="HiddenH7">Secret Option 7 (G)</a>
+                            <a class="dropdown-item" href="#" data-test-value="HiddenH8">Secret Option 8 (H)</a>
+                            <a class="dropdown-item" href="#" data-test-value="HiddenH9">Secret Option 9 (I)</a>
+                            <a class="dropdown-item" href="#" data-test-value="HiddenH10">Secret Option 10 (J)</a>
+                        </div>
+                    </div>
+                    <small class="text-muted">Target button by Name: **qa_name_item7_btn**. Option by Attr: `[data-test-value='HiddenH4']`</small>
+                    <script>
+                        // Custom toggle logic remains, selection logic is in the central handler below
+                        document.getElementById('hiddenToggle').onclick = function() {
+                            const menu = document.getElementById('hiddenDropdownMenu');
+                            // Toggle visibility using block/none display for testing hidden elements
+                            menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
+                        };
+                    </script>
+                </div>
+
+                <!-- 8. Floating Dropdown (Simulated hover, relies on Selenium Actions) - DEFINITIVE FIX 2: Added delay/clear logic -->
+                <div class="form-group">
+                    <label>8. Floating Dropdown (10 Items)</label>
+                    <!-- Mouse events on the parent div containing both button and menu -->
+                    <div 
+                        class="dropdown floating-dropdown-container"
+                        onmouseover="openFloatingMenu(this)" 
+                        onmouseout="closeFloatingMenu(this)"
+                    >
+                        <div class="dropdown-description">
+                            **Type:** Custom hover trigger (onmouseover). **Now uses a delay/clear system for robust hovering.**
+                        </div>
+                        <button 
+                            class="btn qa-dropdown-component" 
+                            type="button" 
+                            id="floatingToggle" 
+                            name="qa_name_item8_btn"
+                            data-test-id="DD-ITEM-8-BUTTON"
+                        >
+                            Mouse Over To Float
+                        </button>
+                        <!-- Added onmouseover to the menu itself, so if the mouse enters the menu, the close timer is cleared -->
+                        <div 
+                            class="dropdown-menu" 
+                            id="floatingDropdownMenu" 
+                            style="position:absolute;"
+                            onmouseover="clearFloatingMenuTimeout(this)"
+                        >
+                            <a class="dropdown-item" href="#" data-test-value="FloatF1">Floating Item 01</a>
+                            <a class="dropdown-item" href="#" data-test-value="FloatF2">Floating Item 02</a>
+                            <a class="dropdown-item bold-item" href="#" data-test-value="FloatF3">Floating Item 03 (Bold)</a>
+                            <a class="dropdown-item" href="#" data-test-value="FloatF4">Floating Item 04</a>
+                            <a class="dropdown-item" href="#" data-test-value="FloatF5">Floating Item 05</a>
+                            <a class="dropdown-item" href="#" data-test-value="FloatF6">Floating Item 06</a>
+                            <a class="dropdown-item" href="#" data-test-value="FloatF7">Floating Item 07</a>
+                            <a class="dropdown-item" href="#" data-test-value="FloatF8">Floating Item 08</a>
+                            <a class="dropdown-item" href="#" data-test-value="FloatF9">Floating Item 09</a>
+                            <a class="dropdown-item" href="#" data-test-value="FloatF10">Floating Item 10</a>
+                        </div>
+                    </div>
+                    <small class="text-muted">Target toggle by ID: **floatingToggle**. Uses hover logic with **50ms delay**.</small>
+                </div>
+                
+                <!-- 9. Pointing Dropdown (Stylistic variation of Bootstrap) - Dropup to prevent overlap -->
+                <div class="form-group">
+                    <label>9. Pointing Dropdown (12 Items)</label>
+                    <div class="dropup pointing-dropdown"> <!-- Class set to 'dropup' -->
+                        <div class="dropdown-description">
+                            **Type:** Standard Bootstrap Dropdown with custom CSS. Updates button text on click. **Menu opens UPWARDS.**
+                        </div>
+                        <button 
+                            class="btn dropdown-toggle qa-dropdown-component" 
+                            type="button" 
+                            id="pointingToggle" 
+                            name="qa_name_item9_btn"
+                            data-toggle="dropdown" 
+                            aria-expanded="false"
+                            data-test-id="DD-ITEM-9-BUTTON"
+                        >
+                            Pointing Menu
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="pointingToggle">
+                            <a class="dropdown-item" href="#" data-test-value="PointP1">Pointing Option 01</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP2">Pointing Option 02</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP3">Pointing Option 03</a>
+                            <a class="dropdown-item bold-item" href="#" data-test-value="PointP4-crucial">Pointing Option 04 (Crucial)</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP5">Pointing Option 05</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP6">Pointing Option 06</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP7">Pointing Option 07</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP8">Pointing Option 08</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP9">Pointing Option 09</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP10">Pointing Option 10</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP11">Pointing Option 11</a>
+                            <a class="dropdown-item" href="#" data-test-value="PointP12">Pointing Option 12</a>
+                        </div>
+                    </div>
+                    <small class="text-muted">Target button by Name: **qa_name_item9_btn**. CSS Selector: `[data-test-id='DD-ITEM-9-BUTTON']`</small>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 10. Inline Dropdown -->
+        <section>
+            <h2 class="section-title">4. Inline Dropdown (Item 10)</h2>
+            <div class="form-group">
+                <label>10. Inline Dropdown (10 Items)</label>
+                <div class="dropdown-description">
+                    **Type:** Native HTML &lt;select&gt; embedded in text. Has ID, Name, Class. Options have Value.
+                </div>
+                <p class="text-base" style="color: #c7d2e8;">
+                    Please select the document <span class="dropdown" style="display: inline-block;">
+                        <select 
+                            class="form-control inline-select-class qa-dropdown-component" 
+                            id="inlineDropdown" 
+                            name="qa_name_item10_select" 
+                            data-test-id="DD-ITEM-10-SELECT"
+                            style="width: auto; display: inline-block; vertical-align: middle; height: 38px;"
+                        >
+                            <option value="PDF" data-test-value="PDF">PDF Report</option>
+                            <option value="DOCX" data-test-value="DOCX">DOCX Document</option>
+                            <option value="CSV" data-test-value="CSV">CSV Data File</option>
+                            <option value="XLSX" data-test-value="XLSX">XLSX Spreadsheet</option>
+                            <option value="XML" data-test-value="XML">XML Data Feed</option>
+                            <option value="JSON" data-test-value="JSON">JSON Configuration</option>
+                            <option value="TXT" data-test-value="TXT">TXT Plain Text</option>
+                            <option value="PNG" data-test-value="PNG">PNG Image</option>
+                            <option value="JPG" data-test-value="JPG">JPG Image</option>
+                            <option value="ZIP" data-test-value="ZIP">ZIP Archive</option>
+                        </select>
+                    </span> format for your download.
+                </p>
+                <small class="text-muted">Target by Name: **qa_name_item10_select**</small>
+            </div>
+        </section>
+        
+        
+        <footer class="pt-6 border-t border-gray-700 mt-8">
+            <h3 class="text-xl font-semibold text-accent-primary mb-3">Locator Quick Reference</h3>
+            <p style="color: #aeb2c8;">All dropdowns now support all common locator types, and custom UI dropdowns now display the selected value.</p>
+        </footer>
+
+    </div>
+
+    <!-- SCRIPT SECTION -->
+    <script>
+        // Store the timer ID globally or per component for the hover fix
+        let floatingMenuTimeoutId = null; 
+
+        // DEFINITIVE FIX 2.1: Open the menu immediately on mouseover
+        function openFloatingMenu(container) {
+            // Clear any pending close operation
+            if (floatingMenuTimeoutId) {
+                clearTimeout(floatingMenuTimeoutId);
+                floatingMenuTimeoutId = null;
+            }
+            // Show the menu immediately
+            container.querySelector('.dropdown-menu').style.display = 'block';
+        }
+
+        // DEFINITIVE FIX 2.2: Close the menu only after a short delay (e.g., 50ms)
+        function closeFloatingMenu(container) {
+            // Clear any existing timeout before setting a new one
+            if (floatingMenuTimeoutId) {
+                clearTimeout(floatingMenuTimeoutId);
+            }
+            // Set a new timeout to close the menu
+            floatingMenuTimeoutId = setTimeout(() => {
+                container.querySelector('.dropdown-menu').style.display = 'none';
+                floatingMenuTimeoutId = null; // Reset the ID after closing
+            }, 50); // 50ms delay
+        }
+
+        // DEFINITIVE FIX 2.3: Clear the timeout if the mouse enters the menu (or an item inside)
+        function clearFloatingMenuTimeout(menuOrItem) {
+            if (floatingMenuTimeoutId) {
+                clearTimeout(floatingMenuTimeoutId);
+                floatingMenuTimeoutId = null;
+            }
+            // Ensure the menu remains visible (useful if the mouse entered the menu directly, bypassing the button)
+            const menu = menuOrItem.classList.contains('dropdown-menu') ? menuOrItem : menuOrItem.closest('.dropdown-menu');
+            if (menu) {
+                menu.style.display = 'block';
+            }
+        }
+
+
+        $(document).ready(function () {
+            
+            // --- 1. SELECTION LOGIC for Bootstrap/Custom Dropdowns (Items 4, 6, 7, 8, 9) ---
+            // Listen for clicks on ALL dropdown items across the page.
+            $(document).on('click', '.dropdown-item', function(e) {
+                // Prevent default link behavior (like navigating to '#')
+                e.preventDefault();
+                
+                // Get the text of the selected item, trimming any extra whitespace
+                const selectedText = $(this).text().trim();
+                
+                // Find the closest parent dropdown container and then look for the toggle button.
+                const $dropdownContainer = $(this).closest('.dropdown, .dropup, .floating-dropdown-container');
+                const $toggleButton = $dropdownContainer.find('.dropdown-toggle, [data-test-id^="DD-ITEM"]').first();
+                
+                // Exclude the sub-menu parent in Item 6, as it only opens the menu, it's not a selection
+                if ($(this).hasClass('sub-menu-parent')) {
+                    // Do nothing for the parent link, just let the menu open/close logic handle it
+                } else {
+                    // Update the button text with the selected value
+                    if ($toggleButton.is('button')) {
+                        $toggleButton.html(selectedText + ' <span class="caret"></span>');
+                    } else if ($toggleButton.is('input')) {
+                        $toggleButton.val(selectedText);
+                    }
+                }
+                
+                // For the Hidden Dropdown (Item 7), we must manually hide the menu as it's not a standard Bootstrap toggle
+                if ($dropdownContainer.find('#hiddenToggle').length) {
+                    $('#hiddenDropdownMenu').css('display', 'none');
+                }
+
+                // For the Floating Dropdown (Item 8), manually close it on selection
+                if ($dropdownContainer.find('#floatingToggle').length) {
+                    $dropdownContainer.find('.dropdown-menu').css('display', 'none');
+                    // Ensure any pending close timeout is cleared when selecting an item
+                    clearFloatingMenuTimeout($dropdownContainer.get(0));
+                }
+
+                // Close all open sub-menus whenever a selection is made
+                $dropdownContainer.find('.dropdown-menu.show').removeClass('show');
+
+            });
+
+
+            // --- 2. MULTI-LEVEL DROPDOWN HANDLER (Item 6) ---
+            // Target the custom submenu toggle link (the 'Engineering' link)
+            $('[data-dropdown-submenu]').on('click', function(e) {
+                // Prevent the default link action and prevent the parent dropdown from closing
+                e.preventDefault();
+                e.stopPropagation();
+
+                const $subMenuToggle = $(this);
+                const $subMenu = $subMenuToggle.next('.dropdown-menu');
+
+                // Toggle visibility manually
+                if ($subMenu.hasClass('show')) {
+                    $subMenu.removeClass('show');
+                } else {
+                    // Hide any other open submenus at this level
+                    $subMenuToggle.parents('.dropdown-menu').find('.dropdown-menu.show').removeClass('show');
+                    $subMenu.addClass('show');
+                }
+            });
+
+            // 3. Global Close Handler for Sub-menus
+            $(document).on('click', function (e) {
+                // If the click is outside the main multi-level container, close all sub-menus
+                if (!$(e.target).closest('#multiLevelContainer').length) {
+                    $('#multiLevelContainer').find('.dropdown-menu.show').removeClass('show');
+                }
+                // Keep the standard Bootstrap dropdown functionality intact for all other buttons
+            });
+            
+            // Re-enable the standard Bootstrap dropdown behavior for all top-level elements
+            $('.dropdown-toggle').dropdown();
+        });
+    </script>
+
+</body>
+</html>
