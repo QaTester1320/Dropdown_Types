@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive Dropdown Testing Sandbox (Definitive Fixes Applied)</title>
+    <title>Comprehensive Dropdown Testing Sandbox (Clipping Issue FIXED - v3)</title>
     <!-- Bootstrap JS/CSS (Required for Multi-Level/Button Dropdowns functionality) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -61,23 +61,27 @@
             padding-top: 20px;
         }
         
-        /* Sections and Grids */
+        /* Layout Padding/Separation */
         section {
             padding: 30px 0;
             border-bottom: 1px dashed rgba(74, 79, 106, 0.3);
         }
-        section:last-of-type {
-            border-bottom: none;
+
+        /* CRITICAL NUCLEAR FIX: Add massive padding to the sections that host dropdowns 
+           that need space (Item 6 opens downward, Items 4, 7, 8, 9 open upward but need safety buffer) 
+           This guarantees space is available below the section's content. */
+        section:nth-child(2) { /* Section 2: Items 4, 5, 6 */
+            padding-bottom: 350px !important; /* Huge buffer for Item 6 (downward) and Item 4 (upward) */
         }
-        
-        /* DEFINITIVE FIX 1: Add a very large spacer component AFTER the section with dropup menus (Section 2) */
-        #dropup-spacer {
-             height: 350px; /* Guarantee vertical space for upwards opening menus */
-             width: 100%;
-             margin: 0;
-             padding: 0;
+        section:nth-child(3) { /* Section 3: Items 7, 8, 9 */
+            padding-bottom: 350px !important; /* Huge buffer for all dropups (7, 8, 9) */
         }
 
+        section:last-of-type {
+            border-bottom: none;
+            padding-bottom: 30px; 
+        }
+        
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -91,35 +95,82 @@
             background-color: #242940; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             transition: transform 0.2s;
-            position: relative; 
-            /* CRITICAL FIX 3: Ensure the card doesn't clip its children. Setting overflow to visible 
-               and ensuring z-index is lower than the menu (which is 1000) prevents clipping. */
+            position: relative; /* Keep relative for containment */
             overflow: visible; 
-            z-index: 5; /* Base stacking context for the card */
+            /* CRITICAL: Ensure card Z-index is lower than menus */
+            z-index: 5; 
         }
         .form-group:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
         }
 
-        /* CRITICAL Z-INDEX FIX: Ensures menu is always on top of all cards, and prevents parent clipping */
+        /* CRITICAL Z-INDEX FIX: Ensures menu is always on top of all cards */
         .dropdown, .dropup, .floating-dropdown-container {
-             /* Increase the stacking context for the dropdown container itself */
              z-index: 10;
         }
         .dropdown-menu {
-            /* This z-index is critical to make it float above everything else */
             z-index: 1000 !important; 
         }
         
-        /* Dropup Fix: Adjusts pointer position for the pointing dropdown when opening upwards */
-        .dropup.pointing-dropdown .dropdown-menu::before {
-            top: auto; /* Reset top position */
-            bottom: -10px; /* Position the arrow at the bottom */
-            border-top: 10px solid var(--accent-primary); /* Change arrow direction to point upwards */
-            border-bottom: none;
+        /* Positioning Overrides for Dropup (Items 4, 7, 8, 9) */
+        /* This ensures that despite custom styling, dropups position correctly */
+        .dropup .dropdown-menu {
+            /* These properties are essential for Bootstrap 4.6 dropup positioning */
+            top: auto !important;
+            bottom: 100% !important;
+            margin-bottom: 5px; /* Small gap between button and menu */
+            left: 0 !important;
+            right: auto !important;
+            transform: none !important; /* Remove any conflicting manual transforms */
         }
-        /* END OF Z-INDEX & DROPUP FIX */
+
+
+        /* Pointing Dropdown (Custom CSS Arrow Simulation) */
+        .pointing-dropdown {
+            position: relative;
+        }
+        
+        /* Custom Arrow Style for standard (downward) open (For Item 6) */
+        .pointing-dropdown.dropdown .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -10px; 
+            left: 15px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid var(--accent-primary); 
+            z-index: 1001; 
+        }
+        
+        /* Custom Arrow Style for dropup (upward) open - REQUIRED FOR ITEM 9 */
+        .pointing-dropdown.dropup .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            bottom: -10px; /* Position arrow at the bottom of the menu */
+            left: 15px;
+            top: auto; /* Remove top positioning */
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid var(--accent-primary); /* Arrow points up from the menu */
+            border-bottom: none; /* Remove downward arrow border */
+            z-index: 1001; 
+        }
+
+        /* Fix for Multi-Level Submenu position (Item 6) */
+        #multiLevelContainer .dropdown-menu {
+            top: auto;
+            right: auto;
+            left: 100%; 
+            margin-top: -30px; 
+            margin-left: 0; 
+        }
+        
+        /* END OF Z-INDEX & DROPUP FIX REVERSION */
 
         
         .form-group label {
@@ -142,7 +193,6 @@
         /* Input and Select Styling (Standard Dropdowns) */
         select.form-control, input.form-control {
             background-color: var(--input-bg);
-            /* Use -webkit-appearance: none to disable native OS styling */
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
@@ -169,13 +219,6 @@
             font-weight: 400;
         }
         
-        /* Optional: Apply bold to specific options using data-attribute */
-        select.form-control option[data-bold] {
-            font-weight: 700 !important;
-            color: var(--accent-secondary) !important;
-        }
-
-
         /* Button Styling (Bootstrap Dropdowns) */
         .btn {
             font-weight: 600;
@@ -227,12 +270,6 @@
             text-shadow: none;
         }
         
-        /* Custom Bold/Styling for Bootstrap Menu Items */
-        .dropdown-item.bold-item {
-            font-weight: 700;
-            color: var(--accent-secondary);
-        }
-
         /* NEW STYLE: Visually mark the actively selected item in custom dropdown menus */
         .dropdown-item.active, 
         .dropdown-item.active:hover, 
@@ -242,21 +279,6 @@
             font-weight: 700;
             border-left: 4px solid var(--accent-primary);
             padding-left: 11px; /* Adjust padding to accommodate the border */
-        }
-
-        /* Pointing Dropdown (Custom CSS Arrow Simulation) */
-        .pointing-dropdown {
-            position: relative;
-        }
-        
-        /* Fix for Multi-Level Submenu clipping when parent is dropup */
-        #multiLevelContainer .dropdown-menu {
-            /* Position relative to the parent item, pushing it to the side */
-            top: auto;
-            right: auto;
-            left: 100%; /* Push it to the right */
-            margin-top: -30px; /* Align vertically with the parent item */
-            margin-left: 0; /* Remove old margin */
         }
 
 
@@ -281,7 +303,7 @@
     <div class="container">
         <header class="pb-4">
             <h1 class="header-title">Automated Dropdown Testing Sandbox</h1>
-            <p class="text-lg" style="color: #c7d2e8;">A highly stylized, comprehensive collection of dropdown elements for testing.</p>
+            <p class="text-lg" style="color: #c7d2e8;">This page now uses **Dropup** for all bottom-of-section items (4, 7, 8, 9) and includes a **massive buffer** below sections 2 and 3 to guarantee no clipping occurs.</p>
         </header>
         
         <!-- Standard HTML Select Dropdowns -->
@@ -293,7 +315,7 @@
                 <div class="form-group">
                     <label for="standardDropdown">1. Standard Dropdown (15 Options)</label>
                     <div class="dropdown-description">
-                        **Type:** Native HTML &lt;select&gt; element. Has ID, Name, Class. Options have Value.
+                        **Type:** Native HTML &lt;select&gt; element. Opens **DOWNWARDS**.
                     </div>
                     <select 
                         class="form-control qa-dropdown-component" 
@@ -325,7 +347,7 @@
                 <div class="form-group">
                     <label for="multiSelectDropdown">2. Multi Select Dropdown (12 Items)</label>
                     <div class="dropdown-description">
-                        **Type:** Native HTML &lt;select multiple&gt;. Has ID, Name, Class. Options have Value.
+                        **Type:** Native HTML &lt;select multiple&gt;. Opens **DOWNWARDS**.
                     </div>
                     <select 
                         multiple 
@@ -355,7 +377,7 @@
                 <div class="form-group">
                     <label for="dropdownList">3. DropdownList (20 Options)</label>
                     <div class="dropdown-description">
-                        **Type:** Standard HTML &lt;select&gt;. Has ID, Name, Class. Options have Value.
+                        **Type:** Standard HTML &lt;select&gt;. Opens **DOWNWARDS**.
                     </div>
                     <select 
                         class="form-control dropdown-list-component qa-dropdown-component" 
@@ -395,10 +417,10 @@
             <h2 class="section-title">2. Custom UI & Advanced Dropdowns (Items 4-6)</h2>
             <div class="grid-container">
 
-                <!-- 4. Bootstrap Dropdown (Non-Select element) - Dropup to prevent overlap -->
+                <!-- 4. Bootstrap Dropdown (Non-Select element) - CRITICAL FIX: Changed to dropup -->
                 <div class="form-group">
                     <label>4. Bootstrap Dropdown (10 Options)</label>
-                    <div class="dropup"> <!-- Class set to 'dropup' -->
+                    <div class="dropup"> <!-- Must open UPWARDS -->
                         <div class="dropdown-description">
                             **Type:** Bootstrap &lt;button&gt; trigger. Updates button text on click. **Menu opens UPWARDS.**
                         </div>
@@ -434,7 +456,7 @@
                 <div class="form-group">
                     <label for="searchComboInput">5. Combo Box / Search Dropdown (15 Cities)</label>
                     <div class="dropdown-description">
-                        **Type:** &lt;input&gt; + &lt;datalist&gt;. Input has ID, Name, Class. Values are in &lt;datalist&gt; options.
+                        **Type:** &lt;input&gt; + &lt;datalist&gt;. Opens **DOWNWARDS**.
                     </div>
                     <input 
                         type="text" 
@@ -466,12 +488,12 @@
                     <small class="text-muted">Target input by Name: **qa_name_item5_input**</small>
                 </div>
 
-                <!-- 6. Multi-level Dropdown (Nested Bootstrap menus) - Dropup to prevent overlap -->
+                <!-- 6. Multi-level Dropdown (Nested Bootstrap menus) - Standard dropdown -->
                 <div class="form-group">
                     <label>6. Multi-level Dropdown (14 Items)</label>
-                    <div class="dropup" id="multiLevelContainer"> <!-- Class set to 'dropup' -->
+                    <div class="dropdown" id="multiLevelContainer"> <!-- Must open DOWNWARDS -->
                         <div class="dropdown-description">
-                            **Type:** Nested Bootstrap Dropdown. Updates button text on click. **Menu opens UPWARDS.**
+                            **Type:** Nested Bootstrap Dropdown. Updates button text on click. **Menu opens DOWNWARDS.**
                         </div>
                         <button 
                             class="btn dropdown-toggle qa-dropdown-component" 
@@ -501,7 +523,6 @@
                                 >
                                     Engineering (8 Sub-Options)
                                 </a>
-                                <!-- CRITICAL FIX 4: Removed inline style for multi-level menu and relied on the new CSS rule -->
                                 <div class="dropdown-menu" aria-labelledby="subMenuToggle">
                                     <!-- NOTE: These L2 items WILL update the main button text -->
                                     <a class="dropdown-item" href="#" id="L2Frontend" data-test-value="EngFrontend">Frontend (L2)</a>
@@ -525,20 +546,17 @@
             </div>
         </section>
         
-        <!-- DEFINITIVE FIX 1: The spacer element that pushes the next section far down -->
-        <div id="dropup-spacer"></div>
-
         <!-- Visibility & Aesthetic Dropdowns -->
         <section>
             <h2 class="section-title">3. Hidden, Floating, and Pointing Dropdowns (Items 7-9)</h2>
             <div class="grid-container">
 
-                <!-- 7. Hidden Dropdown (Initially display: none) - Retains original dropdown class for simpler custom scripting -->
+                <!-- 7. Hidden Dropdown (Initially display: none) - CRITICAL FIX: Changed to dropup -->
                 <div class="form-group">
                     <label>7. Hidden Dropdown (10 Items)</label>
-                    <div class="dropup"> <!-- Changed to dropup to prevent bottom clipping -->
+                    <div class="dropup"> <!-- Must open UPWARDS -->
                         <div class="dropdown-description">
-                            **Type:** Custom visibility toggle. Updates button text on click. **Now opens UPWARDS.**
+                            **Type:** Custom visibility toggle. Updates button text on click. **Menu opens UPWARDS.**
                         </div>
                         <button 
                             class="btn qa-dropdown-component" 
@@ -550,7 +568,7 @@
                             Toggle Hidden Menu
                         </button>
                         <!-- Menu is initially hidden using style, must be made visible to interact -->
-                        <div class="dropdown-menu" id="hiddenDropdownMenu" style="display: none;">
+                        <div class="dropdown-menu" id="hiddenDropdownMenu" style="display: none; position: absolute; bottom: 100%; top: auto;"> 
                             <a class="dropdown-item" href="#" data-test-value="HiddenH1">Secret Option 1 (A)</a>
                             <a class="dropdown-item" href="#" data-test-value="HiddenH2">Secret Option 2 (B)</a>
                             <a class="dropdown-item" href="#" data-test-value="HiddenH3">Secret Option 3 (C)</a>
@@ -570,21 +588,27 @@
                             const menu = document.getElementById('hiddenDropdownMenu');
                             // Toggle visibility using block/none display for testing hidden elements
                             menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
+                            // CRITICAL FIX: Ensure the dropup positioning is applied
+                            if (menu.style.display === 'block') {
+                                menu.style.bottom = '100%';
+                                menu.style.top = 'auto';
+                                menu.style.position = 'absolute';
+                            }
                         };
                     </script>
                 </div>
 
-                <!-- 8. Floating Dropdown (Simulated hover, relies on Selenium Actions) - DEFINITIVE FIX 2: Added delay/clear logic -->
+                <!-- 8. Floating Dropdown (Simulated hover, relies on Selenium Actions) - CRITICAL FIX: Changed to dropup -->
                 <div class="form-group">
                     <label>8. Floating Dropdown (10 Items)</label>
                     <!-- Mouse events on the parent div containing both button and menu -->
                     <div 
-                        class="dropup floating-dropdown-container" /* Changed to dropup to prevent bottom clipping */
+                        class="dropup floating-dropdown-container" /* Must open UPWARDS */
                         onmouseover="openFloatingMenu(this)" 
                         onmouseout="closeFloatingMenu(this)"
                     >
                         <div class="dropdown-description">
-                            **Type:** Custom hover trigger (onmouseover). **Now uses a delay/clear system for robust hovering and opens UPWARDS.**
+                            **Type:** Custom hover trigger (onmouseover). **Menu opens UPWARDS.**
                         </div>
                         <button 
                             class="btn qa-dropdown-component" 
@@ -599,7 +623,7 @@
                         <div 
                             class="dropdown-menu" 
                             id="floatingDropdownMenu" 
-                            style="position:absolute;"
+                            style="display: none; position: absolute; bottom: 100%; top: auto;" /* CRITICAL: Force dropup styles for manual visibility */
                             onmouseover="clearFloatingMenuTimeout(this)"
                         >
                             <a class="dropdown-item" href="#" data-test-value="FloatF1">Floating Item 01</a>
@@ -617,10 +641,10 @@
                     <small class="text-muted">Target toggle by ID: **floatingToggle**. Uses hover logic with **50ms delay**.</small>
                 </div>
                 
-                <!-- 9. Pointing Dropdown (Stylistic variation of Bootstrap) - Dropup to prevent overlap -->
+                <!-- 9. Pointing Dropdown (Stylistic variation of Bootstrap) - CRITICAL FIX: Changed to dropup -->
                 <div class="form-group">
                     <label>9. Pointing Dropdown (12 Items)</label>
-                    <div class="dropup pointing-dropdown"> <!-- Class set to 'dropup' -->
+                    <div class="dropup pointing-dropdown"> <!-- Must open UPWARDS -->
                         <div class="dropdown-description">
                             **Type:** Standard Bootstrap Dropdown with custom CSS. Updates button text on click. **Menu opens UPWARDS.**
                         </div>
@@ -655,14 +679,14 @@
 
             </div>
         </section>
-
-        <!-- 10. Inline Dropdown -->
+        
+        <!-- 4. Inline Dropdown (Item 10) -->
         <section>
             <h2 class="section-title">4. Inline Dropdown (Item 10)</h2>
             <div class="form-group">
                 <label>10. Inline Dropdown (10 Items)</label>
                 <div class="dropdown-description">
-                    **Type:** Native HTML &lt;select&gt; embedded in text. Has ID, Name, Class. Options have Value.
+                    **Type:** Native HTML &lt;select&gt; embedded in text. Opens **DOWNWARDS**.
                 </div>
                 <p class="text-base" style="color: #c7d2e8;">
                     Please select the document <span class="dropdown" style="display: inline-block;">
@@ -693,7 +717,7 @@
         
         <footer class="pt-6 border-t border-gray-700 mt-8">
             <h3 class="text-xl font-semibold text-accent-primary mb-3">Locator Quick Reference</h3>
-            <p style="color: #aeb2c8;">All dropdowns now support all common locator types, and custom UI dropdowns now display the selected value.</p>
+            <p style="color: #aeb2c8;">Items 4, 7, 8, and 9 use **Dropup** and are protected by a **350px padding buffer** to prevent clipping by the next section.</p>
         </footer>
 
     </div>
@@ -711,7 +735,15 @@
                 floatingMenuTimeoutId = null;
             }
             // Show the menu immediately
-            container.querySelector('.dropdown-menu').style.display = 'block';
+            const menu = container.querySelector('.dropdown-menu');
+            menu.style.display = 'block';
+            
+            // CRITICAL FIX FOR FLOATING DROPUP (Item 8): Ensure dropup positioning is applied
+            if (container.classList.contains('dropup')) {
+                menu.style.position = 'absolute';
+                menu.style.bottom = '100%'; 
+                menu.style.top = 'auto';
+            }
         }
 
         // DEFINITIVE FIX 2.2: Close the menu only after a short delay (e.g., 50ms)
@@ -722,7 +754,11 @@
             }
             // Set a new timeout to close the menu
             floatingMenuTimeoutId = setTimeout(() => {
-                container.querySelector('.dropdown-menu').style.display = 'none';
+                const menu = container.querySelector('.dropdown-menu');
+                menu.style.display = 'none';
+                // Reset custom positioning after close
+                menu.style.bottom = 'auto'; 
+                menu.style.top = 'auto';
                 floatingMenuTimeoutId = null; // Reset the ID after closing
             }, 50); // 50ms delay
         }
@@ -737,6 +773,11 @@
             const menu = menuOrItem.classList.contains('dropdown-menu') ? menuOrItem : menuOrItem.closest('.dropdown-menu');
             if (menu) {
                 menu.style.display = 'block';
+                // Ensure dropup positioning is applied
+                if (menu.parentElement.classList.contains('dropup')) {
+                     menu.style.bottom = '100%'; 
+                     menu.style.top = 'auto';
+                }
             }
         }
 
@@ -758,13 +799,15 @@
                 const $dropdownContainer = $clickedItem.closest('.dropdown, .dropup, .floating-dropdown-container');
                 const $toggleButton = $dropdownContainer.find('.dropdown-toggle, [data-test-id^="DD-ITEM"]').first();
                 
-                // Exclude the sub-menu parent in Item 6, as it only opens the menu, it's not a selection
+                // Exclude the sub-menu parent in Item 6, as it only opens the menu, not selects a value
                 if ($clickedItem.hasClass('sub-menu-parent')) {
                     // Do nothing for the parent link, just let the menu open/close logic handle it
                 } else {
                     // Update the button text with the selected value
                     if ($toggleButton.is('button')) {
-                        $toggleButton.html(selectedText + ' <span class="caret"></span>');
+                        // Keep the caret structure
+                        const caretClass = $dropdownContainer.hasClass('dropup') ? 'dropup-caret' : 'caret';
+                        $toggleButton.html(selectedText + ' <span class="' + caretClass + '"></span>');
                     } else if ($toggleButton.is('input')) {
                         $toggleButton.val(selectedText);
                     }
@@ -781,11 +824,16 @@
                 // For the Hidden Dropdown (Item 7), we must manually hide the menu as it's not a standard Bootstrap toggle
                 if ($dropdownContainer.find('#hiddenToggle').length) {
                     $('#hiddenDropdownMenu').css('display', 'none');
+                    // Reset manual positioning after close
+                    $('#hiddenDropdownMenu').css({'bottom': 'auto', 'top': 'auto'});
                 }
 
                 // For the Floating Dropdown (Item 8), manually close it on selection
                 if ($dropdownContainer.find('#floatingToggle').length) {
-                    $dropdownContainer.find('.dropdown-menu').css('display', 'none');
+                    const $menu = $dropdownContainer.find('.dropdown-menu');
+                    $menu.css('display', 'none');
+                    // Reset manual positioning after close
+                    $menu.css({'bottom': 'auto', 'top': 'auto'});
                     // Ensure any pending close timeout is cleared when selecting an item
                     clearFloatingMenuTimeout($dropdownContainer.get(0));
                 }
